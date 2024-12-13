@@ -19,7 +19,7 @@ const Dashboard = () => {
     pickupDate: '',
     dropoffDate: ''
   });
-  const [currentLocation, setCurrentLocation] = useState('Fetching location...');
+  const [currentLocation, setCurrentLocation] = useState('your location...');
 
   useEffect(() => {
     // Fetch user's location using the Geolocation API
