@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Car, 
   ChevronRight, 
@@ -19,6 +19,32 @@ const Dashboard = () => {
     pickupDate: '',
     dropoffDate: ''
   });
+  const [currentLocation, setCurrentLocation] = useState('Fetching location...');
+
+  useEffect(() => {
+    // Fetch user's location using the Geolocation API
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`)
+            .then((response) => response.json())
+            .then((data) => {
+              const location = data.display_name || 'Unknown Location';
+              setCurrentLocation(location);
+            })
+            .catch(() => {
+              setCurrentLocation('Unable to fetch location.');
+            });
+        },
+        () => {
+          setCurrentLocation('Location access denied.');
+        }
+      );
+    } else {
+      setCurrentLocation('Geolocation is not supported in this browser.');
+    }
+  }, []);
 
   const featuredCars = [
        { id: 1, name: 'Tesla Model S', imageUrl: 'tesla.jpg', pricePerDay: 100, type: 'Electric', transmission: 'Automatic', seats: 5, fuelType: 'Electric' },
@@ -75,8 +101,11 @@ const Dashboard = () => {
               Welcome, User
             </h1>
             <p className="text-gray-600 dark:text-gray-300 text-lg animate-slide-in-left">
-              Find your perfect ride for the next adventure
+              Find your perfect ride for the next adventure at {currentLocation}
             </p>
+            {/* <p className="text-gray-500 dark:text-gray-400 text-sm animate-slide-in-left">
+              Current Location: {currentLocation}
+            </p> */}
           </div>
           
           {/* Action Buttons */}
