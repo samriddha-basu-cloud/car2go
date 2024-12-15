@@ -6,9 +6,8 @@ import {
   Lock, 
   User,
   Phone,
-  FileType,
+  FileType 
 } from 'lucide-react';
-
 
 const LoginRegisterPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -21,21 +20,91 @@ const LoginRegisterPage = () => {
     firstName: '',
     lastName: '',
     phoneNumber: '',
-    roleType: ''
+    roleType: []
   });
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prevState => ({
       ...prevState,
-      [name]: value
+      [name]: name === 'roleType' ? [value] : value
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // TODO: Implement login/registration logic
-    console.log(formData);
+    setError(null);
+    setIsLoading(true);
+
+    const formDataToSend = new FormData();
+    formDataToSend.append('email', formData.email);
+    formDataToSend.append('password', formData.password);
+
+    try {
+      const response = await fetch('https://localhost:7273/api/Auth/Login', {
+        method: 'POST',
+        headers: {
+          'accept': '*/*'
+        },
+        body: formDataToSend
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Login failed');
+      }
+
+      const result = await response.text();
+      console.log('Login successful:', result);
+      // TODO: Handle successful login (e.g., store token, redirect)
+    } catch (err) {
+      setError(err.message);
+      console.error('Login error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setError(null);
+    setIsLoading(true);
+
+    const registrationData = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      password: formData.password,
+      phoneNumber: formData.phoneNumber,
+      roleType: formData.roleType
+    };
+
+    try {
+      const response = await fetch('https://localhost:7273/api/Auth/register', {
+        method: 'POST',
+        headers: {
+          'accept': 'text/plain',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(registrationData)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Registration failed');
+      }
+
+      const result = await response.text();
+      console.log('Registration successful:', result);
+      // TODO: Handle successful registration (e.g., switch to login, show success message)
+    } catch (err) {
+      setError(err.message);
+      console.error('Registration error:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -55,7 +124,7 @@ const LoginRegisterPage = () => {
       </div>
 
       {/* Main Content */}
-      <div className="min-h-screen flex items-center justify-center relative z-10 px-4 sm:px-6 mt-12 lg:px-8 py-12">
+      <div className="min-h-screen flex items-center justify-center relative z-10 px-4 sm:px-6 lg:px-8 py-12">
         <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 relative overflow-hidden animate-slide-in-up">
           {/* Subtle Gradient Overlay */}
           <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
@@ -72,8 +141,15 @@ const LoginRegisterPage = () => {
             </p>
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+              <span className="block sm:inline">{error}</span>
+            </div>
+          )}
+
           {/* Login/Register Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={isLogin ? handleLogin : handleRegister} className="space-y-4">
             {isLogin ? (
               // Login Form
               <>
@@ -183,14 +259,14 @@ const LoginRegisterPage = () => {
                   <FileType className="w-6 h-6 text-orange-500" />
                   <select 
                     name="roleType"
-                    value={formData.roleType}
+                    value={formData.roleType[0] || ''}
                     onChange={handleInputChange}
                     className="bg-transparent w-full focus:outline-none text-gray-700 dark:text-gray-200"
                     required
                   >
                     <option value="">Select Role Type</option>
-                    <option value="customer">Customer</option>
-                    <option value="agent">Agent</option>
+                    <option value="Customer">Customer</option>
+                    <option value="Agent">Agent</option>
                   </select>
                 </div>
               </>
@@ -199,17 +275,27 @@ const LoginRegisterPage = () => {
             {/* Submit Button */}
             <button 
               type="submit" 
-              className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl px-6 py-3 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transition-all animate-slide-in-up"
+              disabled={isLoading}
+              className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl px-6 py-3 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transition-all animate-slide-in-up disabled:opacity-50"
             >
-              {isLogin ? <LogIn className="mr-2" /> : <UserPlus className="mr-2" />}
-              {isLogin ? 'Log In' : 'Sign Up'}
+              {isLoading ? (
+                <span className="animate-pulse">Processing...</span>
+              ) : (
+                <>
+                  {isLogin ? <LogIn className="mr-2" /> : <UserPlus className="mr-2" />}
+                  {isLogin ? 'Log In' : 'Sign Up'}
+                </>
+              )}
             </button>
           </form>
 
           {/* Toggle Between Login/Register */}
           <div className="text-center mt-6">
             <button 
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={() => {
+                setIsLogin(!isLogin);
+                setError(null);
+              }}
               className="text-blue-600 dark:text-blue-400 hover:underline animate-slide-in-up"
             >
               {isLogin 
