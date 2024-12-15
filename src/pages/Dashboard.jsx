@@ -4,12 +4,8 @@ import {
   ChevronRight, 
   Filter, 
   Search, 
-  SlidersHorizontal,
   MapPin,
   Calendar,
-  CreditCard,
-  Star,
-  Zap
 } from 'lucide-react';
 import CarCard from '../components/CarCard';
 
@@ -20,6 +16,9 @@ const Dashboard = () => {
     dropoffDate: ''
   });
   const [currentLocation, setCurrentLocation] = useState('your location...');
+  const [cars, setCars] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     // Fetch user's location using the Geolocation API
@@ -44,36 +43,39 @@ const Dashboard = () => {
     } else {
       setCurrentLocation('Geolocation is not supported in this browser.');
     }
+
+    // Fetch cars from API
+    const fetchCars = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('https://localhost:7273/api/Car/get-all-cars', {
+          method: 'GET',
+          headers: {
+            'accept': 'text/plain'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch cars');
+        }
+
+        const data = await response.json();
+        setCars(data);
+        setIsLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setIsLoading(false);
+      }
+    };
+
+    fetchCars();
   }, []);
 
-  const featuredCars = [
-       { id: 1, name: 'Tesla Model S', imageUrl: 'tesla.jpg', pricePerDay: 100, type: 'Electric', transmission: 'Automatic', seats: 5, fuelType: 'Electric' },
-    { id: 2, name: 'BMW X5', imageUrl: 'bmw.jpg', pricePerDay: 90, type: 'SUV', transmission: 'Semi-Automatic', seats: 7, fuelType: 'Diesel' },
-    { id: 3, name: 'Mercedes C-Class', imageUrl: 'mercedes.jpg', pricePerDay: 85, type: 'Luxury', transmission: 'Automatic', seats: 5, fuelType: 'Hybrid' },
-    { id: 4, name: 'Audi A4', imageUrl: 'audi.jpg', pricePerDay: 80, type: 'Sedan', transmission: 'Manual', seats: 4, fuelType: 'Petrol' },
-    { id: 5, name: 'Ford Mustang', imageUrl: 'ford.jpg', pricePerDay: 95, type: 'Sports', transmission: 'Manual', seats: 4, fuelType: 'Petrol' },
-    { id: 6, name: 'Chevrolet Camaro', imageUrl: 'chevrolet.jpg', pricePerDay: 75, type: 'Sports', transmission: 'Automatic', seats: 4, fuelType: 'Petrol' },
-    { id: 7, name: 'Honda Civic', imageUrl: 'honda.jpg', pricePerDay: 70, type: 'Compact', transmission: 'CVT', seats: 5, fuelType: 'Petrol' },
-    { id: 8, name: 'Toyota Corolla', imageUrl: 'toyota.jpg', pricePerDay: 65, type: 'Sedan', transmission: 'Automatic', seats: 5, fuelType: 'Hybrid' },
-    { id: 9, name: 'Nissan Altima', imageUrl: 'nissan.jpg', pricePerDay: 60, type: 'Sedan', transmission: 'CVT', seats: 5, fuelType: 'Petrol' },
-    { id: 10, name: 'Volkswagen Passat', imageUrl: 'volkswagen.jpg', pricePerDay: 55, type: 'Midsize', transmission: 'Manual', seats: 5, fuelType: 'Diesel' },
-    { id: 11, name: 'Porsche 911', imageUrl: 'porsche.jpg', pricePerDay: 150, type: 'Sports', transmission: 'Automatic', seats: 2, fuelType: 'Petrol' },
-    { id: 12, name: 'Lexus RX', imageUrl: 'lexus.jpg', pricePerDay: 110, type: 'SUV', transmission: 'Automatic', seats: 5, fuelType: 'Hybrid' },
-    { id: 13, name: 'Jaguar XF', imageUrl: 'jaguar.jpg', pricePerDay: 120, type: 'Luxury', transmission: 'Automatic', seats: 5, fuelType: 'Diesel' },
-    { id: 14, name: 'Mazda CX-5', imageUrl: 'mazda.jpg', pricePerDay: 85, type: 'SUV', transmission: 'Automatic', seats: 5, fuelType: 'Petrol' },
-    { id: 15, name: 'Subaru Outback', imageUrl: 'subaru.jpg', pricePerDay: 75, type: 'Crossover', transmission: 'CVT', seats: 5, fuelType: 'Petrol' },
-    { id: 16, name: 'Kia Sorento', imageUrl: 'kia.jpg', pricePerDay: 70, type: 'SUV', transmission: 'Automatic', seats: 7, fuelType: 'Petrol' },
-    { id: 17, name: 'Hyundai Elantra', imageUrl: 'hyundai.jpg', pricePerDay: 60, type: 'Sedan', transmission: 'Automatic', seats: 5, fuelType: 'Petrol' },
-    { id: 18, name: 'Volvo XC90', imageUrl: 'volvo.jpg', pricePerDay: 130, type: 'SUV', transmission: 'Automatic', seats: 7, fuelType: 'Hybrid' },
-    { id: 19, name: 'Jeep Wrangler', imageUrl: 'jeep.jpg', pricePerDay: 90, type: 'SUV', transmission: 'Manual', seats: 5, fuelType: 'Petrol' },
-    { id: 20, name: 'Ferrari F8', imageUrl: 'ferrari.jpg', pricePerDay: 200, type: 'Sports', transmission: 'Automatic', seats: 2, fuelType: 'Petrol' },
-  ];
-
   const carCategories = [
-    { icon: <Zap className="w-8 h-8 text-yellow-500" />, name: 'Electric' },
-    { icon: <Car className="w-8 h-8 text-blue-500" />, name: 'Sedan' },
-    { icon: <CreditCard className="w-8 h-8 text-green-500" />, name: 'Budget' },
-    { icon: <Star className="w-8 h-8 text-purple-500" />, name: 'Luxury' }
+    { icon: <Car className="w-8 h-8 text-blue-500" />, name: 'All Cars' },
+    { icon: <Car className="w-8 h-8 text-green-500" />, name: 'Available' },
+    { icon: <Car className="w-8 h-8 text-yellow-500" />, name: 'Sedan' },
+    { icon: <Car className="w-8 h-8 text-red-500" />, name: 'SUV' }
   ];
 
   return (
@@ -103,9 +105,6 @@ const Dashboard = () => {
             <p className="text-gray-600 dark:text-gray-300 text-lg animate-slide-in-left">
               Find your perfect ride for the next adventure at {currentLocation}
             </p>
-            {/* <p className="text-gray-500 dark:text-gray-400 text-sm animate-slide-in-left">
-              Current Location: {currentLocation}
-            </p> */}
           </div>
           
           {/* Action Buttons */}
@@ -182,11 +181,59 @@ const Dashboard = () => {
             </button>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-slide-in-right">
-            {featuredCars.map(car => (
-              <CarCard key={car.id} {...car} />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="text-center py-8">
+              <p className="text-gray-600 dark:text-gray-300">Loading cars...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <p className="text-red-600 dark:text-red-400">Error: {error}</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-slide-in-right">
+              {cars.map(car => (
+                <div 
+                  key={car.licensePlate} 
+                  className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all"
+                >
+                  <img 
+                    src={car.imageUrl} 
+                    alt={`${car.make} ${car.model}`} 
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="p-4">
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                      {car.make} {car.model}
+                    </h3>
+                    <div className="flex justify-between items-center mt-2">
+                      <span className="text-gray-600 dark:text-gray-300">
+                        {car.year} | {car.colour}
+                      </span>
+                      <span className="text-blue-600 dark:text-blue-400 font-semibold">
+                        ₹{car.pricePerDay}/day
+                      </span>
+                    </div>
+                    <div className="mt-4 grid grid-cols-3 gap-2 text-sm text-gray-600 dark:text-gray-300">
+                      <div className="text-center">
+                        <p>Seats</p>
+                        <p className="font-bold">{car.totalSeats}</p>
+                      </div>
+                      <div className="text-center">
+                        <p>City</p>
+                        <p className="font-bold">{car.city}</p>
+                      </div>
+                      <div className="text-center">
+                        <p>Status</p>
+                        <p className={`font-bold ${car.availableStatus ? 'text-green-600' : 'text-red-600'}`}>
+                          {car.availableStatus ? 'Available' : 'Booked'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
