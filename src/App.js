@@ -10,6 +10,7 @@ import ManageReservation from './pages/ManageReservation';
 import SettingsPage from './pages/SettingsPage';
 import CarDetailsPage from './pages/CarDetailsPage';
 
+
 const App = () => {
   return (
     <Router>
