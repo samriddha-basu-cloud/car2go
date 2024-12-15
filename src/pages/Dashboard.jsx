@@ -6,8 +6,104 @@ import {
   Search, 
   MapPin,
   Calendar,
+  Eye,
+  ArrowRight
 } from 'lucide-react';
-import CarCard from '../components/CarCard';
+import { Link } from 'react-router-dom';
+
+const CarCard = ({ car }) => {
+  return (
+    <div className="w-full max-w-md mx-auto transform transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl rounded-2xl overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-lg">
+      {/* Image Section with Gradient Overlay */}
+      <div className="relative h-64">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40 z-10 pointer-events-none"></div>
+        <img 
+          src={car.imageUrl} 
+          alt={`${car.make} ${car.model}`} 
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+        />
+        <div className="absolute top-4 right-4 z-20 bg-white/80 dark:bg-gray-900/80 rounded-full px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-200 shadow-md">
+          {car.availableStatus ? 'Available' : 'Booked'}
+        </div>
+      </div>
+
+      {/* Card Content */}
+      <div className="p-6 space-y-4">
+        {/* Title and Location */}
+        <div className="flex justify-between items-center">
+          <h3 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">
+            {car.make} {car.model}
+          </h3>
+          <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
+            <MapPin className="w-4 h-4 mr-1 text-blue-500" />
+            {car.city}
+          </div>
+        </div>
+
+        {/* Car Details Grid */}
+        <div className="grid grid-cols-2 gap-4 text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 p-4 rounded-xl">
+          <div className="flex items-center space-x-3">
+            <Calendar className="w-6 h-6 text-blue-500 flex-shrink-0" />
+            <div>
+              <span className="text-sm font-medium block">Year</span>
+              <span className="text-xs text-gray-500">{car.year}</span>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3">
+            <Car className="w-6 h-6 text-blue-500 flex-shrink-0" />
+            <div>
+              <span className="text-sm font-medium block">Seats</span>
+              <span className="text-xs text-gray-500">{car.totalSeats} Seats</span>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3">
+            <Eye className="w-6 h-6 text-blue-500 flex-shrink-0" />
+            <div>
+              <span className="text-sm font-medium block">Color</span>
+              <span className="text-xs text-gray-500">{car.colour}</span>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3">
+            <ArrowRight className="w-6 h-6 text-blue-500 flex-shrink-0" />
+            <div>
+              <span className="text-sm font-medium block">License</span>
+              <span className="text-xs text-gray-500">{car.licensePlate}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Pricing and CTA */}
+        <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div>
+            <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              ₹{car.pricePerDay}
+              <span className="text-sm text-gray-600 dark:text-gray-400 ml-1">/ day</span>
+            </div>
+            <div className={`text-xs mt-1 ${car.availableStatus ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+              {car.availableStatus ? 'Available' : 'Not Available'}
+            </div>
+          </div>
+          <Link
+            to={`/car/${car.licensePlate}`}
+            className={`group/link flex items-center space-x-2 px-6 py-3.5 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95 ${
+              car.availableStatus 
+                ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white' 
+                : 'bg-gray-300 dark:bg-gray-700 text-gray-500 cursor-not-allowed'
+            }`}
+            {...(car.availableStatus ? {} : { disabled: true })}
+          >
+            <span className="font-semibold">
+              {car.availableStatus ? 'Rent Now' : 'Unavailable'}
+            </span>
+            {car.availableStatus && (
+              <ArrowRight className="w-5 h-5 transform transition-transform group-hover/link:translate-x-1" />
+            )}
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Dashboard = () => {
   const [searchParams, setSearchParams] = useState({
@@ -73,9 +169,9 @@ const Dashboard = () => {
 
   const carCategories = [
     { icon: <Car className="w-8 h-8 text-blue-500" />, name: 'All Cars' },
-    { icon: <Car className="w-8 h-8 text-green-500" />, name: 'Available' },
-    { icon: <Car className="w-8 h-8 text-yellow-500" />, name: 'Sedan' },
-    { icon: <Car className="w-8 h-8 text-red-500" />, name: 'SUV' }
+    { icon: <ArrowRight className="w-8 h-8 text-green-500" />, name: 'Available' },
+    { icon: <Calendar className="w-8 h-8 text-yellow-500" />, name: 'Newest' },
+    { icon: <Eye className="w-8 h-8 text-purple-500" />, name: 'Popular' }
   ];
 
   return (
@@ -170,71 +266,34 @@ const Dashboard = () => {
         </div>
 
         {/* Featured Cars Section */}
-        <div>
-          <div className="flex justify-between items-center mb-6 animate-slide-in-up">
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 flex items-center">
-              <Car className="mr-3 text-blue-600 dark:text-blue-400" />
-              Featured Cars
-            </h2>
-            <button className="text-blue-600 dark:text-blue-400 flex items-center hover:underline">
-              View All <ChevronRight className="ml-2" />
-            </button>
-          </div>
-          
-          {isLoading ? (
-            <div className="text-center py-8">
-              <p className="text-gray-600 dark:text-gray-300">Loading cars...</p>
-            </div>
-          ) : error ? (
-            <div className="text-center py-8">
-              <p className="text-red-600 dark:text-red-400">Error: {error}</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-slide-in-right">
-              {cars.map(car => (
-                <div 
-                  key={car.licensePlate} 
-                  className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all"
-                >
-                  <img 
-                    src={car.imageUrl} 
-                    alt={`${car.make} ${car.model}`} 
-                    className="w-full h-48 object-cover"
-                  />
-                  <div className="p-4">
-                    <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">
-                      {car.make} {car.model}
-                    </h3>
-                    <div className="flex justify-between items-center mt-2">
-                      <span className="text-gray-600 dark:text-gray-300">
-                        {car.year} | {car.colour}
-                      </span>
-                      <span className="text-blue-600 dark:text-blue-400 font-semibold">
-                        ₹{car.pricePerDay}/day
-                      </span>
-                    </div>
-                    <div className="mt-4 grid grid-cols-3 gap-2 text-sm text-gray-600 dark:text-gray-300">
-                      <div className="text-center">
-                        <p>Seats</p>
-                        <p className="font-bold">{car.totalSeats}</p>
-                      </div>
-                      <div className="text-center">
-                        <p>City</p>
-                        <p className="font-bold">{car.city}</p>
-                      </div>
-                      <div className="text-center">
-                        <p>Status</p>
-                        <p className={`font-bold ${car.availableStatus ? 'text-green-600' : 'text-red-600'}`}>
-                          {car.availableStatus ? 'Available' : 'Booked'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+      <div>
+        <div className="flex justify-between items-center mb-6 animate-slide-in-up">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 flex items-center">
+            <Car className="mr-3 text-blue-600 dark:text-blue-400" />
+            Featured Cars
+          </h2>
+          <button className="text-blue-600 dark:text-blue-400 flex items-center hover:underline">
+            View All <ChevronRight className="ml-2" />
+          </button>
         </div>
+        
+        {isLoading ? (
+          <div className="text-center py-8">
+            <p className="text-gray-600 dark:text-gray-300">Loading cars...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-8">
+            <p className="text-red-600 dark:text-red-400">Error: {error}</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-slide-in-right">
+            {cars.map(car => (
+              <CarCard key={car.licensePlate} car={car} />
+            ))}
+          </div>
+        )}
+      </div>
+  
       </div>
     </div>
   );
