@@ -1,6 +1,7 @@
-import React from 'react';
 import { Car, ShieldCheck, Star, MapPin, Globe, ChevronRight, Quote, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
 const LandingPage = () => {
   const blogs = [
@@ -27,29 +28,54 @@ const LandingPage = () => {
     },
   ];
 
-  const reviews = [
-    {
-      id: 1,
-      name: 'Emily Johnson',
-      location: 'New York, NY',
-      quote: 'Absolutely fantastic service! The car was clean, modern, and perfect for my business trip.',
-      rating: 5,
-    },
-    {
-      id: 2,
-      name: 'Michael Chen',
-      location: 'San Francisco, CA',
-      quote: 'Smooth booking process and great customer support. Will definitely rent again!',
-      rating: 5,
-    },
-    {
-      id: 3,
-      name: 'Sarah Rodriguez',
-      location: 'Miami, FL',
-      quote: 'Wide selection of cars and very competitive prices. Made my vacation so much easier!',
-      rating: 4,
-    },
-  ];
+  // const reviews = [
+  //   {
+  //     id: 1,
+  //     name: 'Emily Johnson',
+  //     location: 'New York, NY',
+  //     quote: 'Absolutely fantastic service! The car was clean, modern, and perfect for my business trip.',
+  //     rating: 5,
+  //   },
+  //   {
+  //     id: 2,
+  //     name: 'Michael Chen',
+  //     location: 'San Francisco, CA',
+  //     quote: 'Smooth booking process and great customer support. Will definitely rent again!',
+  //     rating: 5,
+  //   },
+  //   {
+  //     id: 3,
+  //     name: 'Sarah Rodriguez',
+  //     location: 'Miami, FL',
+  //     quote: 'Wide selection of cars and very competitive prices. Made my vacation so much easier!',
+  //     rating: 4,
+  //   },
+  // ];
+
+    const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchReviews = async () => {
+    try {
+      const response = await axios.get('https://localhost:7273/api/Review/get-all-Reviews', {
+        headers: {
+          'accept': 'text/plain',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJNeWFwcF9Vc2VyX0lkIjoiMSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWVpZGVudGlmaWVyIjoiemFoYWJpeWFAZ21haWwuY29tIiwic3ViIjoiMSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFkbWluIiwiZXhwIjoxNzM0Mjk4MTU0LCJpc3MiOiJodHRwczovL2xvY2FsaG9zdDo3MjczIiwiYXVkIjoiQXVkaWVuY2UifQ.AfJ9AEZ2_HsB0NTX7nBh2ktg3wi1K9XcLIJlesLRIfY'
+        }
+      });
+      setReviews(response.data);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching reviews:', err);
+      setError('Failed to load reviews');
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchReviews();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 relative overflow-hidden">
@@ -132,31 +158,37 @@ const LandingPage = () => {
           <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200 text-center mb-8">
             What Our Customers Say
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {reviews.map((review) => (
-              <div 
-                key={review.id}
-                className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2 border border-gray-100 dark:border-gray-700 relative"
-              >
-            <Quote className="absolute top-4 left-4 text-gray-200 dark:text-gray-700 w-12 h-12 transform rotate-180" />
-                <div className="flex flex-col items-center text-center">
-                  <p className="text-gray-600 dark:text-gray-300 mb-4 italic z-10 relative">
-                    "{review.quote}"
-                  </p>
-                  <div className="flex mb-2">
-                    {[...Array(review.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                    ))}
-                  </div>
-                  <div>
-                    <p className="font-bold text-gray-800 dark:text-gray-200">{review.name}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{review.location}</p>
+          {loading ? (
+            <p className="text-center text-gray-600 dark:text-gray-300">Loading reviews...</p>
+          ) : error ? (
+            <p className="text-center text-red-600 dark:text-red-400">{error}</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {reviews.map((review) => (
+                <div 
+                  key={review.id}
+                  className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2 border border-gray-100 dark:border-gray-700 relative"
+                >
+                  <Quote className="absolute top-4 left-4 text-gray-200 dark:text-gray-700 w-12 h-12 transform rotate-180" />
+                  <div className="flex flex-col items-center text-center">
+                    <p className="text-gray-600 dark:text-gray-300 mb-4 italic z-10 relative">
+                      "{review.quote}"
+                    </p>
+                    <div className="flex mb-2">
+                      {[...Array(review.rating)].map((_, i) => (
+                        <Star key={i} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+                      ))}
+                    </div>
+                    <div>
+                      <p className="font-bold text-gray-800 dark:text-gray-200">{review.name}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{review.location}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          )}
           </div>
-        </div>
 
         {/* Blog Section */}
         <div>
