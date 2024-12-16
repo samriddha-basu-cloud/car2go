@@ -29,33 +29,10 @@ const LandingPage = () => {
     },
   ];
 
-  // const reviews = [
-  //   {
-  //     id: 1,
-  //     name: 'Emily Johnson',
-  //     location: 'New York, NY',
-  //     quote: 'Absolutely fantastic service! The car was clean, modern, and perfect for my business trip.',
-  //     rating: 5,
-  //   },
-  //   {
-  //     id: 2,
-  //     name: 'Michael Chen',
-  //     location: 'San Francisco, CA',
-  //     quote: 'Smooth booking process and great customer support. Will definitely rent again!',
-  //     rating: 5,
-  //   },
-  //   {
-  //     id: 3,
-  //     name: 'Sarah Rodriguez',
-  //     location: 'Miami, FL',
-  //     quote: 'Wide selection of cars and very competitive prices. Made my vacation so much easier!',
-  //     rating: 4,
-  //   },
-  // ];
-
-    const [reviews, setReviews] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const fetchReviews = async () => {
     try {
@@ -76,6 +53,8 @@ const LandingPage = () => {
 
   useEffect(() => {
     fetchReviews();
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token);
   }, []);
 
   return (
@@ -97,11 +76,11 @@ const LandingPage = () => {
             Your trusted platform for renting cars effortlessly. Discover the perfect car for every trip and make your journey unforgettable.
           </p>
           <Link 
-            to="/dashboard"
+            to={isLoggedIn ? "/dashboard" : "/login"}
             className="inline-flex mt-6 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full px-6 py-3 items-center space-x-2 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1"
           >
             <Car className="w-5 h-5" />
-            <span>Start Exploring</span>
+            <span>{isLoggedIn ? "Start Exploring" : "Login"}</span>
           </Link>
         </div>
 
@@ -198,49 +177,6 @@ const LandingPage = () => {
             ))}
           </div>
         </div>
-
-
-        {/* <div className="mb-16 mt-16">
-          <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200 text-center mb-8">
-            What Our Customers Say
-          </h2>
-          {loading ? (
-            <p className="text-center text-gray-600 dark:text-gray-300">Loading reviews...</p>
-          ) : error ? (
-            <p className="text-center text-red-600 dark:text-red-400">{error}</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {reviews.map((review) => (
-                <div 
-                  key={review.id}
-                  className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2 border border-gray-100 dark:border-gray-700 relative"
-                >
-                  <Quote className="absolute top-4 left-4 text-gray-200 dark:text-gray-700 w-12 h-12 transform rotate-180" />
-                  <div className="flex flex-col items-center text-center">
-                    <p className="text-gray-600 dark:text-gray-300 mb-4 italic z-10 relative">
-                      "{review.quote}"
-                    </p>
-                    <div className="flex mb-2">
-                      {[...Array(review.rating)].map((_, i) => (
-                        <Star key={i} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                      ))}
-                    </div>
-                    <div>
-                      <p className="font-bold text-gray-800 dark:text-gray-200">{review.name}</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{review.location}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-
-          {/* Review Submission section */}
-           {/*} <div className="mt-16">
-              <ReviewSubmission />
-            </div>
-          </div> */}
 
         
       </div>

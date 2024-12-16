@@ -467,7 +467,7 @@ const findCars = async () => {
           )}
         </div>
 
-        <div className="mb-12">
+        {/* <div className="mb-12">
   <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 flex items-center mb-6">
     <Car className="mr-3 text-blue-600 dark:text-blue-400" />
     Cars Available in Your Location
@@ -485,7 +485,7 @@ const findCars = async () => {
       {cars.map(car => <CarCard key={car.licensePlate} car={car} />)}
     </div>
   )}
-</div>
+</div> */}
 
         {/* Featured Cars */}
         <div>
