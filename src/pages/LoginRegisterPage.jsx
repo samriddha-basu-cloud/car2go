@@ -8,6 +8,7 @@ import {
   Phone,
   FileType 
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const LoginRegisterPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -24,10 +25,11 @@ const LoginRegisterPage = () => {
   });
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prevState => ({
+    setFormData((prevState) => ({
       ...prevState,
       [name]: name === 'roleType' ? [value] : value
     }));
@@ -46,9 +48,9 @@ const LoginRegisterPage = () => {
       const response = await fetch('https://localhost:7273/api/Auth/Login', {
         method: 'POST',
         headers: {
-          'accept': '*/*'
+          accept: '*/*',
         },
-        body: formDataToSend
+        body: formDataToSend,
       });
 
       if (!response.ok) {
@@ -58,7 +60,8 @@ const LoginRegisterPage = () => {
 
       const result = await response.text();
       console.log('Login successful:', result);
-      // TODO: Handle successful login (e.g., store token, redirect)
+      // Redirect to home
+      navigate('/');
     } catch (err) {
       setError(err.message);
       console.error('Login error:', err);
@@ -78,17 +81,17 @@ const LoginRegisterPage = () => {
       email: formData.email,
       password: formData.password,
       phoneNumber: formData.phoneNumber,
-      roleType: formData.roleType
+      roleType: formData.roleType,
     };
 
     try {
       const response = await fetch('https://localhost:7273/api/Auth/register', {
         method: 'POST',
         headers: {
-          'accept': 'text/plain',
-          'Content-Type': 'application/json'
+          accept: 'text/plain',
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(registrationData)
+        body: JSON.stringify(registrationData),
       });
 
       if (!response.ok) {
@@ -98,7 +101,8 @@ const LoginRegisterPage = () => {
 
       const result = await response.text();
       console.log('Registration successful:', result);
-      // TODO: Handle successful registration (e.g., switch to login, show success message)
+      // Switch to login form
+      setIsLogin(true);
     } catch (err) {
       setError(err.message);
       console.error('Registration error:', err);
@@ -265,16 +269,16 @@ const LoginRegisterPage = () => {
                     required
                   >
                     <option value="">Select Role Type</option>
-                    <option value="Customer">Customer</option>
+                    <option value="User">User</option>
                     <option value="Agent">Agent</option>
                   </select>
                 </div>
               </>
             )}
 
-            {/* Submit Button */}
-            <button 
-              type="submit" 
+           {/* Submit Button */}
+            <button
+              type="submit"
               disabled={isLoading}
               className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl px-6 py-3 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transition-all animate-slide-in-up disabled:opacity-50"
             >
@@ -291,18 +295,19 @@ const LoginRegisterPage = () => {
 
           {/* Toggle Between Login/Register */}
           <div className="text-center mt-6">
-            <button 
+            <button
               onClick={() => {
                 setIsLogin(!isLogin);
                 setError(null);
               }}
               className="text-blue-600 dark:text-blue-400 hover:underline animate-slide-in-up"
             >
-              {isLogin 
-                ? 'Create a new account' 
+              {isLogin
+                ? 'Create a new account'
                 : 'Already have an account? Log In'}
             </button>
           </div>
+
 
           {/* Copyright */}
           <p className="text-center text-gray-500 dark:text-gray-400 mt-8 text-sm animate-slide-in-up">

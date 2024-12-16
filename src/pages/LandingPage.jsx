@@ -2,6 +2,7 @@ import { Car, ShieldCheck, Star, MapPin, Globe, ChevronRight, Quote, Users } fro
 import { Link } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import ReviewSubmission from '../components/ReviewSubmission';
 
 const LandingPage = () => {
   const blogs = [
@@ -153,43 +154,6 @@ const LandingPage = () => {
           </div>
         </div>
 
-        {/* Reviews Section */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200 text-center mb-8">
-            What Our Customers Say
-          </h2>
-          {loading ? (
-            <p className="text-center text-gray-600 dark:text-gray-300">Loading reviews...</p>
-          ) : error ? (
-            <p className="text-center text-red-600 dark:text-red-400">{error}</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {reviews.map((review) => (
-                <div 
-                  key={review.id}
-                  className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2 border border-gray-100 dark:border-gray-700 relative"
-                >
-                  <Quote className="absolute top-4 left-4 text-gray-200 dark:text-gray-700 w-12 h-12 transform rotate-180" />
-                  <div className="flex flex-col items-center text-center">
-                    <p className="text-gray-600 dark:text-gray-300 mb-4 italic z-10 relative">
-                      "{review.quote}"
-                    </p>
-                    <div className="flex mb-2">
-                      {[...Array(review.rating)].map((_, i) => (
-                        <Star key={i} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                      ))}
-                    </div>
-                    <div>
-                      <p className="font-bold text-gray-800 dark:text-gray-200">{review.name}</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{review.location}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-          </div>
-
         {/* Blog Section */}
         <div>
           <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200 text-center mb-8">
@@ -224,6 +188,51 @@ const LandingPage = () => {
             ))}
           </div>
         </div>
+
+        {/* Reviews Section */}
+        <div className="mb-16 mt-16">
+          <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200 text-center mb-8">
+            What Our Customers Say
+          </h2>
+          {loading ? (
+            <p className="text-center text-gray-600 dark:text-gray-300">Loading reviews...</p>
+          ) : error ? (
+            <p className="text-center text-red-600 dark:text-red-400">{error}</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {reviews.map((review) => (
+                <div 
+                  key={review.id}
+                  className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2 border border-gray-100 dark:border-gray-700 relative"
+                >
+                  <Quote className="absolute top-4 left-4 text-gray-200 dark:text-gray-700 w-12 h-12 transform rotate-180" />
+                  <div className="flex flex-col items-center text-center">
+                    <p className="text-gray-600 dark:text-gray-300 mb-4 italic z-10 relative">
+                      "{review.quote}"
+                    </p>
+                    <div className="flex mb-2">
+                      {[...Array(review.rating)].map((_, i) => (
+                        <Star key={i} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+                      ))}
+                    </div>
+                    <div>
+                      <p className="font-bold text-gray-800 dark:text-gray-200">{review.name}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{review.location}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+
+          {/* Review Submission section */}
+            <div className="mt-16">
+              <ReviewSubmission />
+            </div>
+          </div>
+
+        
       </div>
     </div>
   );
