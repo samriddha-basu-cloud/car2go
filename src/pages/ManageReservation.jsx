@@ -20,7 +20,7 @@ const FloatingCircle = ({ size, top, left, delay, duration, color }) => {
 
 const ManageReservation = () => {
   const [reservations, setReservations] = useState([]);
-  const [deleteConfirmation, setDeleteConfirmation] = useState(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState(null); // Stores reservation to be confirmed for deletion
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -59,48 +59,44 @@ const ManageReservation = () => {
     fetchReservations();
   }, []);
 
-  const handleUpdate = (id) => {
-    alert(`Update reservation with ID: ${id}`);
-  };
-
   const handleDelete = async (licensePlate) => {
-  const userEmail = localStorage.getItem('email'); // Fetch email from localStorage
-  if (!userEmail) {
-    console.error('User email not found in localStorage');
-    return;
-  }
-
-  try {
-    // Call the Cancel API
-    const response = await fetch(
-      `https://localhost:7273/api/Reservation/Cancel?email=${encodeURIComponent(userEmail)}&licensePlate=${encodeURIComponent(licensePlate)}`,
-      {
-        method: 'POST',
-        headers: {
-          accept: '*/*',
-        },
-        body: '', // The body is empty as specified
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error('Failed to cancel the reservation');
+    const userEmail = localStorage.getItem('email'); // Fetch email from localStorage
+    if (!userEmail) {
+      console.error('User email not found in localStorage');
+      return;
     }
 
-    // Update the reservation status in the UI
-    setReservations((prevReservations) =>
-      prevReservations.map((reservation) =>
-        reservation.carNumber === licensePlate
-          ? { ...reservation, reservationStatus: 'Cancelled' }
-          : reservation
-      )
-    );
+    try {
+      // Call the Cancel API
+      const response = await fetch(
+        `https://localhost:7273/api/Reservation/Cancel?email=${encodeURIComponent(userEmail)}&licensePlate=${encodeURIComponent(licensePlate)}`,
+        {
+          method: 'POST',
+          headers: {
+            accept: '*/*',
+          },
+          body: '', // The body is empty as specified
+        }
+      );
 
-    setDeleteConfirmation(null); // Close the delete confirmation dialog if any
-  } catch (error) {
-    console.error('Error canceling the reservation:', error);
-  }
-};
+      if (!response.ok) {
+        throw new Error('Failed to cancel the reservation');
+      }
+
+      // Update the reservation status in the UI
+      setReservations((prevReservations) =>
+        prevReservations.map((reservation) =>
+          reservation.carNumber === licensePlate
+            ? { ...reservation, reservationStatus: 'Cancelled' }
+            : reservation
+        )
+      );
+
+      setDeleteConfirmation(null); // Close the delete confirmation dialog
+    } catch (error) {
+      console.error('Error canceling the reservation:', error);
+    }
+  };
 
   const filteredReservations = reservations.filter(reservation => 
     reservation.carMake.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -109,23 +105,23 @@ const ManageReservation = () => {
   );
 
   const getStatusDisplay = (status) => {
-  switch (status) {
-    case 'Confirmed':
-      return {
-        icon: <CheckCircle className="mr-2" size={24} />,
-        text: 'Confirmed',
-        className: 'text-green-600 dark:text-green-400',
-      };
-    case 'Cancelled':
-      return {
-        icon: <XCircle className="mr-2" size={24} />,
-        text: 'Cancelled',
-        className: 'text-red-600 dark:text-red-400',
-      };
-    default:
-      return null;
-  }
-};
+    switch(status) {
+      case 'Confirmed':
+        return {
+          icon: <CheckCircle className="mr-2" size={24} />,
+          text: 'Confirmed',
+          className: 'text-green-600 dark:text-green-400',
+        };
+      case 'Cancelled':
+        return {
+          icon: <XCircle className="mr-2" size={24} />,
+          text: 'Cancelled',
+          className: 'text-red-600 dark:text-red-400',
+        };
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 overflow-hidden">
@@ -222,7 +218,7 @@ const ManageReservation = () => {
                         </div>
                         <div className="flex space-x-4">
                           <button
-                            onClick={() => handleUpdate(reservation.carNumber)}
+                            onClick={() => alert(`Update reservation with ID: ${reservation.carNumber}`)}
                             className="
                               flex items-center 
                               px-4 py-2 
@@ -237,7 +233,7 @@ const ManageReservation = () => {
                             Update
                           </button>
                           <button
-                            onClick={() => handleDelete(reservation.carNumber)}
+                            onClick={() => setDeleteConfirmation(reservation)}
                             className="
                               flex items-center 
                               px-4 py-2 
@@ -259,6 +255,46 @@ const ManageReservation = () => {
               )}
             </div>
           </>
+        )}
+
+        {/* Delete Confirmation Dialog */}
+        {deleteConfirmation && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                Are you sure you want to cancel this reservation?
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">
+                {deleteConfirmation.carMake} {deleteConfirmation.carModel}, License Plate: {deleteConfirmation.carNumber}
+              </p>
+              <div className="flex justify-center space-x-4">
+                <button
+                  onClick={() => handleDelete(deleteConfirmation.carNumber)}
+                  className="
+                    px-4 py-2 
+                    bg-red-500 hover:bg-red-600 
+                    text-white rounded-full 
+                    transition-all duration-300 
+                    transform hover:scale-105
+                  "
+                >
+                  Confirm
+                </button>
+                <button
+                  onClick={() => setDeleteConfirmation(null)}
+                  className="
+                    px-4 py-2 
+                    bg-gray-500 hover:bg-gray-600 
+                    text-white rounded-full 
+                    transition-all duration-300 
+                    transform hover:scale-105
+                  "
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
