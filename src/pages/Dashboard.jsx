@@ -8,7 +8,12 @@ import {
   DollarSign,
   Users,
   CheckCircle2,
-  XCircle
+  XCircle,
+  CalendarIcon,
+  TagIcon,
+  MapIcon,
+  BuildingIcon,
+  FlagIcon
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -29,6 +34,13 @@ const Dashboard = () => {
   const [dropdownData, setDropdownData] = useState({});
   const [activeFilters, setActiveFilters] = useState([]);
   const token = localStorage.getItem('token');
+
+  // Hero section statistics (mock data, replace with actual backend data)
+  const heroStats = {
+    totalCars: 150,
+    citiesServed: 10,
+    activeRentals: 45
+  };
 
   // Fetch dropdown data and featured cars
   useEffect(() => {
@@ -125,10 +137,20 @@ const Dashboard = () => {
       border border-gray-100 
       dark:border-gray-700
     `}>
+      {/* Car Image */}
+      <div 
+        className="h-52 bg-cover bg-center"
+        style={{ 
+          backgroundImage: `url(${car.imageUrl || '/default-car-image.jpg'})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      />
+
       <div className="p-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">
-            {car.make} {car.model}
+            {car.make} {car.model} {car.year}
           </h3>
           {featured && (
             <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full dark:bg-blue-900 dark:text-blue-300">
@@ -138,28 +160,35 @@ const Dashboard = () => {
         </div>
 
         <div className="space-y-3">
-          <div className="flex items-center text-gray-600 dark:text-gray-400">
-            <PaletteIcon className="mr-2 w-5 h-5 text-blue-500" />
-            <span>Colour: {car.colour}</span>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="flex items-center text-gray-600 dark:text-gray-400">
+              <PaletteIcon className="mr-2 w-5 h-5 text-blue-500" />
+              <span>{car.colour}</span>
+            </div>
+            <div className="flex items-center text-gray-600 dark:text-gray-400">
+              <Users className="mr-2 w-5 h-5 text-purple-500" />
+              <span>{car.totalSeats} Seats</span>
+            </div>
+            <div className="flex items-center text-gray-600 dark:text-gray-400">
+              <MapPin className="mr-2 w-5 h-5 text-green-500" />
+              <span>{car.city}, {car.state}</span>
+            </div>
+            <div className="flex items-center text-gray-600 dark:text-gray-400">
+              <DollarSign className="mr-2 w-5 h-5 text-green-500" />
+              <span>₹{car.pricePerDay}/day</span>
+            </div>
           </div>
-          <div className="flex items-center text-gray-600 dark:text-gray-400">
-            <DollarSign className="mr-2 w-5 h-5 text-green-500" />
-            <span>₹{car.pricePerDay}/day</span>
-          </div>
-          <div className="flex items-center text-gray-600 dark:text-gray-400">
-            <Users className="mr-2 w-5 h-5 text-purple-500" />
-            <span>{car.totalSeats} Seats</span>
-          </div>
-          <div className="flex items-center">
+          
+          <div className="flex items-center mt-2">
             {car.availableStatus ? (
               <>
                 <CheckCircle2 className="mr-2 w-5 h-5 text-green-500" />
-                <span className="text-green-600">Available</span>
+                <span className="text-green-600">Available from {car.availableDate}</span>
               </>
             ) : (
               <>
                 <XCircle className="mr-2 w-5 h-5 text-red-500" />
-                <span className="text-red-600">Booked</span>
+                <span className="text-red-600">Currently Booked</span>
               </>
             )}
           </div>
@@ -196,8 +225,50 @@ const Dashboard = () => {
     </div>
   );
 
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 relative overflow-hidden">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden before:absolute before:top-0 before:left-1/2 before:bg-[url('https://preline.co/assets/svg/examples/polygon-bg-element.svg')] before:bg-no-repeat before:bg-top before:bg-cover before:w-full before:h-full before:-z-[1] before:transform before:-translate-x-1/2 dark:before:bg-[url('https://preline.co/assets/svg/examples/polygon-bg-element-dark.svg')]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-10">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-gray-800 dark:text-white sm:text-5xl md:text-6xl">
+              Find Your Perfect Ride
+            </h1>
+            <p className="mt-4 text-xl text-gray-600 dark:text-gray-300">
+              Explore our extensive fleet of cars across India
+            </p>
+
+            <div className="mt-8 flex justify-center items-center space-x-4">
+              <div className="flex flex-col items-center">
+                <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                  {heroStats.totalCars}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-300">
+                  Total Cars
+                </div>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+                  {heroStats.citiesServed}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-300">
+                  Cities
+                </div>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                  {heroStats.activeRentals}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-300">
+                  Active Rentals
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Main Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Search Filters */}
