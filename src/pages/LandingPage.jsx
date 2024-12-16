@@ -149,9 +149,9 @@ const LandingPage = () => {
                     </div>
                     
                     {/* Review Date */}
-                    <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                    {/* <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                       Reviewed on: {new Date(review.reviewCreatedAt).toLocaleDateString()}
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               ))}
