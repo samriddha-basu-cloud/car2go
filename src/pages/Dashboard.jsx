@@ -46,7 +46,6 @@ const [userLocation, setUserLocation] = useState({ city: '', state: '' });
 useEffect(() => {
   const fetchUserLocationAndCars = async () => {
     try {
-      // Fetch user location
       if (!navigator.geolocation) {
         throw new Error("Geolocation is not supported by this browser.");
       }
@@ -54,7 +53,7 @@ useEffect(() => {
       navigator.geolocation.getCurrentPosition(async (position) => {
         const { latitude, longitude } = position.coords;
 
-        // Replace this with your preferred geocoding API
+        // Replace with your actual geocoding API key
         const geocodingUrl = `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=YOUR_GEOCODING_API_KEY`;
 
         const geoResponse = await fetch(geocodingUrl);
@@ -65,50 +64,49 @@ useEffect(() => {
         const geoData = await geoResponse.json();
         const city = geoData.results[0].components.city || geoData.results[0].components.town;
         const state = geoData.results[0].components.state;
+        setUserLocation({ city, state });
 
-        // Fetch cars by city or state
-        const carResponse = await fetch(
-          `https://localhost:7273/api/CarSearch/get-cars-by-city?city=${city}`,
+        // Fetch cars by city first
+        const cityResponse = await fetch(
+          `https://localhost:7273/api/CarFilterByLocation/get-cars-by-city?city=${city}`,
           {
             method: 'GET',
             headers: {
               accept: 'text/plain',
-              Authorization: `Bearer ${token}`
-            }
+              Authorization: `Bearer ${token}`,
+            },
           }
         );
 
-        if (carResponse.ok) {
-          const cityCars = await carResponse.json();
+        if (cityResponse.ok) {
+          const cityCars = await cityResponse.json();
           if (cityCars.length > 0) {
             setCars(cityCars);
-          } else {
-            // Fallback to state if no cars in the city
-            const stateResponse = await fetch(
-              `https://localhost:7273/api/CarSearch/get-cars-by-state?state=${state}`,
-              {
-                method: 'GET',
-                headers: {
-                  accept: 'text/plain',
-                  Authorization: `Bearer ${token}`
-                }
-              }
-            );
-
-            if (stateResponse.ok) {
-              const stateCars = await stateResponse.json();
-              if (stateCars.length > 0) {
-                setCars(stateCars);
-              } else {
-                setError(`Sorry, we don't have any cars available in your city (${city}) or state (${state}).`);
-              }
-            } else {
-              setError(`Sorry, we don't have any cars available in your city (${city}) or state (${state}).`);
-            }
+            return;
           }
-        } else {
-          setError(`Sorry, we don't have any cars available in your city (${city}) or state (${state}).`);
         }
+
+        // Fallback to state search if no cars in city
+        const stateResponse = await fetch(
+          `https://localhost:7273/api/CarFilterByLocation/get-cars-by-state?state=${state}`,
+          {
+            method: 'GET',
+            headers: {
+              accept: 'text/plain',
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (stateResponse.ok) {
+          const stateCars = await stateResponse.json();
+          if (stateCars.length > 0) {
+            setCars(stateCars);
+            return;
+          }
+        }
+
+        setError(`Sorry, we don't have any cars available in your city (${city}) or state (${state}).`);
       });
     } catch (err) {
       setError(err.message);
@@ -181,12 +179,22 @@ const findCars = async () => {
     // Single Field Search
     if (activeFilters.length === 1) {
       const field = activeFilters[0];
-      url = `https://localhost:7273/api/CarSearch/get-cars-by-${field}?${field}=${filters[field]}`;
+      if (field === "city") {
+        url = `https://localhost:7273/api/CarFilterByLocation/get-cars-by-city?city=${filters[field]}`;
+      } else if (field === "state") {
+        url = `https://localhost:7273/api/CarFilterByLocation/get-cars-by-state?state=${filters[field]}`;
+      } else {
+        url = `https://localhost:7273/api/CarSearch/get-cars-by-${field}?${field}=${filters[field]}`;
+      }
     }
     // Double Field Search
     else if (activeFilters.length === 2) {
       const [field1, field2] = activeFilters;
-      url = `https://localhost:7273/api/CarFilter/get-cars-by-${field1}-and-${field2}?${field1}=${filters[field1]}&${field2}=${filters[field2]}`;
+      if (field1 === "city" && field2 === "state") {
+        url = `https://localhost:7273/api/CarFilterByLocation/get-cars-by-city-and-state?city=${filters[field1]}&state=${filters[field2]}`;
+      } else {
+        url = `https://localhost:7273/api/CarFilter/get-cars-by-${field1}-and-${field2}?${field1}=${filters[field1]}&${field2}=${filters[field2]}`;
+      }
     } else {
       throw new Error('Please select at least one filter');
     }
@@ -195,8 +203,8 @@ const findCars = async () => {
       method: 'GET',
       headers: {
         accept: 'text/plain',
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (!response.ok) {
