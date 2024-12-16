@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Trash2, Edit2, Car, MapPin, Palette, CheckCircle, Clock, XCircle } from 'lucide-react';
+import axios from 'axios'; // Make sure to install axios: npm install axios
 
 const FloatingCircle = ({ size, top, left, delay, duration, color }) => {
   return (
@@ -19,101 +20,11 @@ const FloatingCircle = ({ size, top, left, delay, duration, color }) => {
 };
 
 const ManageReservation = () => {
-  const [reservations, setReservations] = useState([
-        { 
-          id: 1, 
-          model: 'Model S', 
-          make: 'Tesla', 
-          color: 'Red', 
-          location: 'New York', 
-          date: '2024-03-15',
-          status: 'active'
-        },
-        { 
-          id: 2, 
-          make: 'BMW', 
-          model: 'X5', 
-          color: 'Black', 
-          location: 'Los Angeles', 
-          date: '2024-03-20',
-          status: 'pending'
-        },
-        { 
-          id: 3, 
-          make: 'Audi', 
-          model: 'A4', 
-          color: 'White', 
-          location: 'Chicago', 
-          date: '2024-04-10',
-          status: 'cancelled'
-        },
-        { 
-          id: 4, 
-          make: 'Mercedes', 
-          model: 'C-Class', 
-          color: 'Silver', 
-          location: 'Houston', 
-          date: '2024-04-15',
-          status: 'completed'
-        },
-        { 
-          id: 5, 
-          make: 'Ford', 
-          model: 'Mustang', 
-          color: 'Blue', 
-          location: 'Miami', 
-          date: '2024-05-05',
-          status: 'cancelled'
-        },
-        { 
-          id: 6, 
-          make: 'Chevrolet', 
-          model: 'Camaro', 
-          color: 'Yellow', 
-          location: 'San Francisco', 
-          date: '2024-05-20',
-          status: 'cancelled'
-        },
-        { 
-          id: 7, 
-          make: 'Honda', 
-          model: 'Civic', 
-          color: 'Gray', 
-          location: 'Seattle', 
-          date: '2024-06-01',
-          status: 'completed'
-        },
-        { 
-          id: 8, 
-          make: 'Toyota', 
-          model: 'Corolla', 
-          color: 'Green', 
-          location: 'Boston', 
-          date: '2024-06-15',
-          status: 'cancelled'
-        },
-        { 
-          id: 9, 
-          make: 'Nissan', 
-          model: 'Altima', 
-          color: 'Black', 
-          location: 'Denver', 
-          date: '2024-07-01',
-          status: 'completed'
-        },
-        { 
-          id: 10, 
-          make: 'Volkswagen', 
-          model: 'Passat', 
-          color: 'White', 
-          location: 'Atlanta', 
-          date: '2024-07-20',
-          status: 'completed'
-        },
-  ]);
-
+  const [reservations, setReservations] = useState([]);
   const [deleteConfirmation, setDeleteConfirmation] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Floating circles configuration
   const floatingCircles = [
@@ -123,13 +34,69 @@ const ManageReservation = () => {
     { size: 120, top: 80, left: 70, delay: 1500, duration: 16000, color: 'rgba(79, 130, 246, 0.2)' },
   ];
 
+  useEffect(() => {
+    // Fetch user email from local storage
+    const userEmail = localStorage.getItem('userEmail');
+    
+    if (!userEmail) {
+      setError('No user email found. Please log in.');
+      setIsLoading(false);
+      return;
+    }
+
+    // Fetch reservations from API
+    const fetchReservations = async () => {
+      try {
+        const response = await axios.get(
+          `https://localhost:7273/api/Reservation/get-reservation-history-of-user?email=${encodeURIComponent(userEmail)}`,
+          {
+            headers: {
+              'accept': 'text/plain'
+            }
+          }
+        );
+        
+        // Transform API response to match existing component structure
+        const transformedReservations = response.data.map((reservation, index) => ({
+          id: index + 1,
+          make: reservation.carMake,
+          model: reservation.carModel,
+          color: reservation.colour,
+          location: reservation.city,
+          date: reservation.pickUpDate,
+          status: reservation.reservationStatus.toLowerCase(),
+          carNumber: reservation.carNumber,
+          totalAmount: reservation.totalAmount,
+          imageUrl: reservation.imageUrl
+        }));
+
+        setReservations(transformedReservations);
+        setIsLoading(false);
+      } catch (err) {
+        console.error('Error fetching reservations:', err);
+        setError('Failed to fetch reservations. Please try again later.');
+        setIsLoading(false);
+      }
+    };
+
+    fetchReservations();
+  }, []);
+
   const handleUpdate = (id) => {
     alert(`Update reservation with ID: ${id}`);
+    // Implement actual update logic
   };
 
-  const handleDelete = (id) => {
-    setReservations(reservations.filter((reservation) => reservation.id !== id));
-    setDeleteConfirmation(null);
+  const handleDelete = async (id) => {
+    try {
+      // You would typically call a delete API endpoint here
+      // For now, we'll just filter out the reservation locally
+      setReservations(reservations.filter((reservation) => reservation.id !== id));
+      setDeleteConfirmation(null);
+    } catch (error) {
+      console.error('Error deleting reservation:', error);
+      alert('Failed to delete reservation');
+    }
   };
 
   const filteredReservations = reservations.filter(reservation => 
@@ -146,10 +113,10 @@ const ManageReservation = () => {
           text: 'Completed',
           className: 'text-green-600 dark:text-green-400'
         };
-      case 'active':
+      case 'confirmed':
         return {
           icon: <Car className="mr-2" size={24} />,
-          text: 'Active',
+          text: 'Confirmed',
           className: 'text-blue-600 dark:text-blue-400'
         };
       case 'pending':
@@ -168,6 +135,32 @@ const ManageReservation = () => {
         return null;
     }
   };
+
+  // Render loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+        <div className="text-center">
+          <div className="animate-spin w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300">Loading reservations...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Render error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+        <div className="text-center bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg">
+          <XCircle className="mx-auto mb-4 text-red-500" size={48} />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Error</h2>
+          <p className="text-gray-600 dark:text-gray-300">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 overflow-hidden">
