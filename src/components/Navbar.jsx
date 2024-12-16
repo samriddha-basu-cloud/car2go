@@ -1,19 +1,13 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Moon, Sun } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext';
-import Tippy from '@tippyjs/react';
-import 'tippy.js/dist/tippy.css';
 
 const Navbar = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const location = useLocation();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    setIsLoggedIn(!!token);
-  }, []);
+  const token = localStorage.getItem('token'); // Check if token is present in localStorage
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -43,26 +37,34 @@ const Navbar = () => {
         <div className="flex items-center space-x-6">
           <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-full p-1">
             {navLinks.map((link) => (
-              <Tippy
-                key={link.name}
-                content={!isLoggedIn ? 'Please login to access this page' : ''}
-                disabled={isLoggedIn}
+              <div 
+                key={link.name} 
+                className="relative group"
               >
-                <span>
-                  <Link
-                    to={isLoggedIn ? link.path : '#'}
-                    className={`
-                      px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 
-                      ${location.pathname === link.path 
-                        ? 'bg-blue-500 text-white shadow-md' 
-                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'}
-                      ${!isLoggedIn ? 'cursor-not-allowed opacity-50' : ''}
-                    `}
+                <Link
+                  to={token ? link.path : '#'}
+                  className={`
+                    px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 
+                    ${location.pathname === link.path && token
+                      ? 'bg-blue-500 text-white shadow-md' 
+                      : token
+                      ? 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
+                      : 'text-gray-400 cursor-not-allowed'}
+                  `}
+                  onClick={(e) => {
+                    if (!token) e.preventDefault(); // Prevent navigation if no token
+                  }}
+                >
+                  {link.name}
+                </Link>
+                {!token && (
+                  <div 
+                    className="absolute bottom-12 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-black text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                   >
-                    {link.name}
-                  </Link>
-                </span>
-              </Tippy>
+                    Please log in to access
+                  </div>
+                )}
+              </div>
             ))}
           </div>
           
