@@ -115,42 +115,52 @@ const LandingPage = () => {
           </p>
         </div>
 
-        {/* Why Choose Us Section */}
-        <div className="mb-16">
+       {/* Reviews Section */}
+        <div className="mb-16 mt-16">
           <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200 text-center mb-8">
-            Why Choose Us
+            What Our Customers Say
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { 
-                icon: <ShieldCheck className="w-10 h-10 text-blue-500 mb-4 mx-auto" />,
-                title: 'Reliable Service',
-                description: 'Our customers trust us for dependable and efficient service every time.'
-              },
-              { 
-                icon: <Star className="w-10 h-10 text-yellow-500 mb-4 mx-auto" />,
-                title: 'Top-notch Cars',
-                description: 'Choose from a wide selection of premium and well-maintained vehicles.'
-              },
-              { 
-                icon: <MapPin className="w-10 h-10 text-green-500 mb-4 mx-auto" />,
-                title: 'Multiple Locations',
-                description: 'With locations across the globe, we are here wherever you need us.'
-              }
-            ].map((feature, index) => (
-              <div 
-                key={index}
-                className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2 border border-gray-100 dark:border-gray-700"
-              >
-                {feature.icon}
-                <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200 text-center mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 text-center">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
+          {loading ? (
+            <p className="text-center text-gray-600 dark:text-gray-300">Loading reviews...</p>
+          ) : error ? (
+            <p className="text-center text-red-600 dark:text-red-400">{error}</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {reviews.map((review) => (
+                <div 
+                  key={review.id}
+                  className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2 border border-gray-100 dark:border-gray-700 relative"
+                >
+                  <Quote className="absolute top-4 left-4 text-gray-200 dark:text-gray-700 w-12 h-12 transform rotate-180" />
+                  <div className="flex flex-col items-center text-center">
+                    {/* Review Text */}
+                    <p className="text-gray-600 dark:text-gray-300 mb-4 italic z-10 relative min-h-[100px]">
+                      "{review.reviewText}"
+                    </p>
+                    
+                    {/* Rating Stars */}
+                    <div className="flex mb-2">
+                      {[...Array(review.rating)].map((_, i) => (
+                        <Star key={i} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+                      ))}
+                      {[...Array(5 - review.rating)].map((_, i) => (
+                        <Star key={i} className="w-5 h-5 text-gray-300 dark:text-gray-600" />
+                      ))}
+                    </div>
+                    
+                    {/* Review Date */}
+                    <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                      Reviewed on: {new Date(review.reviewCreatedAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Review Submission section */}
+          <div className="mt-16">
+            <ReviewSubmission />
           </div>
         </div>
 
