@@ -1,29 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Edit2, Save, Trash2, LogOut, Bell, MapPin } from 'lucide-react';
 
 const SettingsPage = () => {
   const [editMode, setEditMode] = useState(false);
   const [userDetails, setUserDetails] = useState({
-    name: 'John Doe',
-    email: 'johndoe@example.com',
-    location: 'New York, USA',
-    phoneNumber: '+1 234 567 890',
-    drivingLicense: 'DL123456789',
-    aadhaarNumber: '1234-5678-9012',
-    password: '********',
+    name: '',
+    email: '',
+    location: '',
+    phoneNumber: '',
+    drivingLicense: '',
+    aadhaarNumber: '',
+    password: '',
   });
-
   const [permissions, setPermissions] = useState({
     emailNotifications: true,
     smsNotifications: false,
     locationAccess: true,
   });
 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [confirmationModal, setConfirmationModal] = useState({
     isOpen: false,
     action: null,
     message: '',
   });
+
+  const fetchUserData = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      const email = localStorage.getItem('email');
+
+      const response = await fetch(
+        `https://localhost:7273/api/User/get-user?email=${encodeURIComponent(email)}`,
+        {
+          method: 'GET',
+          headers: {
+            Accept: 'text/plain',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setUserDetails({
+        name: `${data.firstName} ${data.lastName}`,
+        email: data.email,
+        phoneNumber: data.phoneNumber,
+        location: 'New York, USA', // Replace with actual location if available
+        drivingLicense: '',
+        aadhaarNumber: '',
+        password: data.password,
+      });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
 
   const handleEditToggle = () => {
     if (editMode) {
@@ -80,6 +123,14 @@ const SettingsPage = () => {
   const closeModal = () => {
     setConfirmationModal({ isOpen: false, action: null, message: '' });
   };
+
+  if (loading) {
+    return <p className="text-center text-gray-700">Loading...</p>;
+  }
+
+  if (error) {
+    return <p className="text-center text-red-600">Error: {error}</p>;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-6">
@@ -192,29 +243,28 @@ const SettingsPage = () => {
         </div>
 
         {/* Account Settings */}
-                         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Account Settings</h2>
-                  </div>
-                  <div className="flex justify-between">
-                    <button
-                      onClick={handleDeleteAccount}
-                      className="bg-red-500 text-white px-6 py-2 rounded-full flex items-center space-x-2 hover:bg-red-600 transition-all"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                      <span>Delete Account</span>
-                    </button>
-                    <button
-                      onClick={handleLogOut}
-                      className="bg-gray-500 text-white px-6 py-2 rounded-full flex items-center space-x-2 hover:bg-gray-600 transition-all"
-                    >
-                      <LogOut className="w-5 h-5" />
-                      <span>Log Out</span>
-                    </button>
-                  </div>
-                </div>
-                </div>
-                
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Account Settings</h2>
+          </div>
+          <div className="flex justify-between">
+            <button
+              onClick={handleDeleteAccount}
+              className="bg-red-500 text-white px-6 py-2 rounded-full flex items-center space-x-2 hover:bg-red-600 transition-all"
+            >
+              <Trash2 className="w-5 h-5" />
+              <span>Delete Account</span>
+            </button>
+            <button
+              onClick={handleLogOut}
+              className="bg-gray-500 text-white px-6 py-2 rounded-full flex items-center space-x-2 hover:bg-gray-600 transition-all"
+            >
+              <LogOut className="w-5 h-5" />
+              <span>Log Out</span>
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Confirmation Modal */}
       {confirmationModal.isOpen && (
