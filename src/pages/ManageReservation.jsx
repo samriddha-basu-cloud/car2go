@@ -217,7 +217,7 @@ const ManageReservation = () => {
                           </div>
                         </div>
                         <div className="flex space-x-4">
-                          <button
+                          {/* <button
                             onClick={() => alert(`Update reservation with ID: ${reservation.carNumber}`)}
                             className="
                               flex items-center 
@@ -231,7 +231,7 @@ const ManageReservation = () => {
                           >
                             <Edit2 className="mr-2" size={16} />
                             Update
-                          </button>
+                          </button> */}
                           <button
                             onClick={() => setDeleteConfirmation(reservation)}
                             className="
