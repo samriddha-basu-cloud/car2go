@@ -2,10 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Car, 
   ChevronRight, 
-  Filter, 
-  Search, 
-  MapPin,
-  Calendar
+  Search
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -20,15 +17,16 @@ const Dashboard = () => {
     availableDate: ''
   });
   const [cars, setCars] = useState([]);
+  const [featuredCars, setFeaturedCars] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [dropdownData, setDropdownData] = useState({});
   const [activeFilters, setActiveFilters] = useState([]);
   const token = localStorage.getItem('token');
 
-  // Fetch dropdown data
+  // Fetch dropdown data and featured cars
   useEffect(() => {
-    const fetchDropdownData = async () => {
+    const fetchDropdownAndFeaturedCars = async () => {
       try {
         const response = await fetch('https://localhost:7273/api/Car/get-all-cars', {
           method: 'GET',
@@ -43,6 +41,7 @@ const Dashboard = () => {
         }
 
         const data = await response.json();
+
         const uniqueValues = (key) => [...new Set(data.map(car => car[key]))];
 
         setDropdownData({
@@ -54,12 +53,16 @@ const Dashboard = () => {
           availableStatus: ['Available', 'Not Available'],
           availableDate: uniqueValues('availableDate')
         });
+
+        // Filter featured cars (e.g., based on availability)
+        const featured = data.filter(car => car.availableStatus === true);
+        setFeaturedCars(featured.slice(0, 6)); // Display top 6 featured cars
       } catch (err) {
         setError(err.message);
       }
     };
 
-    fetchDropdownData();
+    fetchDropdownAndFeaturedCars();
   }, [token]);
 
   // Handle form submission
@@ -111,96 +114,21 @@ const Dashboard = () => {
         {/* Search Filters */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Make Dropdown */}
-            <select
-              disabled={isFieldDisabled('make')}
-              value={filters.make}
-              onChange={(e) => handleFilterChange('make', e.target.value)}
-              className={`bg-gray-50 dark:bg-gray-700 p-3 rounded-xl focus:outline-none ${isFieldDisabled('make') && 'cursor-not-allowed opacity-50'}`}
-            >
-              <option value="">Select Make</option>
-              {dropdownData.make?.map((make, index) => (
-                <option key={index} value={make}>{make}</option>
-              ))}
-            </select>
-
-            {/* Model Dropdown */}
-            <select
-              disabled={isFieldDisabled('model')}
-              value={filters.model}
-              onChange={(e) => handleFilterChange('model', e.target.value)}
-              className={`bg-gray-50 dark:bg-gray-700 p-3 rounded-xl focus:outline-none ${isFieldDisabled('model') && 'cursor-not-allowed opacity-50'}`}
-            >
-              <option value="">Select Model</option>
-              {dropdownData.model?.map((model, index) => (
-                <option key={index} value={model}>{model}</option>
-              ))}
-            </select>
-
-            {/* Colour Dropdown */}
-            <select
-              disabled={isFieldDisabled('colour')}
-              value={filters.colour}
-              onChange={(e) => handleFilterChange('colour', e.target.value)}
-              className={`bg-gray-50 dark:bg-gray-700 p-3 rounded-xl focus:outline-none ${isFieldDisabled('colour') && 'cursor-not-allowed opacity-50'}`}
-            >
-              <option value="">Select Colour</option>
-              {dropdownData.colour?.map((colour, index) => (
-                <option key={index} value={colour}>{colour}</option>
-              ))}
-            </select>
-
-            {/* Price Dropdown */}
-            <select
-              disabled={isFieldDisabled('price')}
-              value={filters.price}
-              onChange={(e) => handleFilterChange('price', e.target.value)}
-              className={`bg-gray-50 dark:bg-gray-700 p-3 rounded-xl focus:outline-none ${isFieldDisabled('price') && 'cursor-not-allowed opacity-50'}`}
-            >
-              <option value="">Select Price</option>
-              {dropdownData.price?.map((price, index) => (
-                <option key={index} value={price}>{price}</option>
-              ))}
-            </select>
-
-            {/* Seats Dropdown */}
-            <select
-              disabled={isFieldDisabled('seats')}
-              value={filters.seats}
-              onChange={(e) => handleFilterChange('seats', e.target.value)}
-              className={`bg-gray-50 dark:bg-gray-700 p-3 rounded-xl focus:outline-none ${isFieldDisabled('seats') && 'cursor-not-allowed opacity-50'}`}
-            >
-              <option value="">Select Seats</option>
-              {dropdownData.seats?.map((seats, index) => (
-                <option key={index} value={seats}>{seats}</option>
-              ))}
-            </select>
-
-            {/* Availability Dropdown */}
-            <select
-              disabled={isFieldDisabled('availableStatus')}
-              value={filters.availableStatus}
-              onChange={(e) => handleFilterChange('availableStatus', e.target.value)}
-              className={`bg-gray-50 dark:bg-gray-700 p-3 rounded-xl focus:outline-none ${isFieldDisabled('availableStatus') && 'cursor-not-allowed opacity-50'}`}
-            >
-              <option value="">Select Availability</option>
-              {dropdownData.availableStatus?.map((status, index) => (
-                <option key={index} value={status}>{status}</option>
-              ))}
-            </select>
-
-            {/* Available Date Dropdown */}
-            <select
-              disabled={isFieldDisabled('availableDate')}
-              value={filters.availableDate}
-              onChange={(e) => handleFilterChange('availableDate', e.target.value)}
-              className={`bg-gray-50 dark:bg-gray-700 p-3 rounded-xl focus:outline-none ${isFieldDisabled('availableDate') && 'cursor-not-allowed opacity-50'}`}
-            >
-              <option value="">Select Available Date</option>
-              {dropdownData.availableDate?.map((date, index) => (
-                <option key={index} value={date}>{date}</option>
-              ))}
-            </select>
+            {/* Dropdown Fields */}
+            {Object.keys(filters).map((field, index) => (
+              <select
+                key={index}
+                disabled={isFieldDisabled(field)}
+                value={filters[field]}
+                onChange={(e) => handleFilterChange(field, e.target.value)}
+                className={`bg-gray-50 dark:bg-gray-700 p-3 rounded-xl focus:outline-none ${isFieldDisabled(field) && 'cursor-not-allowed opacity-50'}`}
+              >
+                <option value="">{`Select ${field.charAt(0).toUpperCase() + field.slice(1)}`}</option>
+                {dropdownData[field]?.map((option, index) => (
+                  <option key={index} value={option}>{option}</option>
+                ))}
+              </select>
+            ))}
           </div>
 
           <div className="text-center mt-6">
@@ -214,28 +142,69 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Results Section */}
-        {isLoading ? (
-          <div className="text-center py-8">
-            <p>Loading cars...</p>
-          </div>
-        ) : error ? (
-          <div className="text-center py-8">
-            <p className="text-red-600">Error: {error}</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {cars.map(car => (
-              <div key={car.licensePlate} className="p-4 bg-white rounded-lg shadow-md">
-                <h3>{car.make} {car.model}</h3>
-                <p>{car.colour}</p>
+        {/* Featured Cars */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 flex items-center">
+            <Car className="mr-3 text-blue-600 dark:text-blue-400" />
+            Featured Cars
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+            {featuredCars.map(car => (
+              <div key={car.licensePlate} className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all">
+                <h3 className="text-lg font-bold">{car.make} {car.model}</h3>
+                <p>Colour: {car.colour}</p>
                 <p>₹{car.pricePerDay}/day</p>
-                <p>{car.availableStatus ? 'Available' : 'Booked'}</p>
-                <Link to={`/car/${car.licensePlate}`}>Details</Link>
+                <p>Seats: {car.totalSeats}</p>
+                <p className={`text-sm ${car.availableStatus ? 'text-green-600' : 'text-red-600'}`}>
+                  {car.availableStatus ? 'Available' : 'Booked'}
+                </p>
+                <Link 
+                  to={`/car/${car.licensePlate}`} 
+                  className="mt-4 inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all"
+                >
+                  View Details
+                </Link>
               </div>
             ))}
           </div>
-        )}
+        </div>
+
+        {/* Search Results */}
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 flex items-center">
+            <Car className="mr-3 text-blue-600 dark:text-blue-400" />
+            Search Results
+          </h2>
+          {isLoading ? (
+            <div className="text-center py-8">
+              <p>Loading cars...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <p className="text-red-600">Error: {error}</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+              {cars.map(car => (
+                <div key={car.licensePlate} className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                  <h3 className="text-lg font-bold">{car.make} {car.model}</h3>
+                  <p>Colour: {car.colour}</p>
+                  <p>₹{car.pricePerDay}/day</p>
+                  <p>Seats: {car.totalSeats}</p>
+                  <p className={`text-sm ${car.availableStatus ? 'text-green-600' : 'text-red-600'}`}>
+                    {car.availableStatus ? 'Available' : 'Booked'}
+                  </p>
+                  <Link 
+                    to={`/car/${car.licensePlate}`} 
+                    className="mt-4 inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all"
+                  >
+                    View Details
+                  </Link>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
