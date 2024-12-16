@@ -18,15 +18,6 @@ import {
 import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
-  const [filters, setFilters] = useState({
-    make: '',
-    model: '',
-    colour: '',
-    price: '',
-    seats: '',
-    availableStatus: '',
-    availableDate: ''
-  });
   const [cars, setCars] = useState([]);
   const [featuredCars, setFeaturedCars] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -39,11 +30,18 @@ const Dashboard = () => {
   citiesServed: 0,
   activeRentals: 0
 });
+const [filters, setFilters] = useState({
+  make: '',
+  model: '',
+  colour: '',
+  price: '',
+  seats: '',
+  availableStatus: '',
+  availableDate: '',
+  city: '', // New field
+  state: '' // New field
+});
 
-
-
-  // Fetch dropdown data and featured cars
-  // Fetch dropdown data, featured cars, and update hero stats
 useEffect(() => {
   const fetchDropdownAndHeroStats = async () => {
     try {
@@ -71,7 +69,9 @@ useEffect(() => {
         price: uniqueValues('pricePerDay'),
         seats: uniqueValues('totalSeats'),
         availableStatus: ['Available', 'Not Available'],
-        availableDate: uniqueValues('availableDate')
+        availableDate: uniqueValues('availableDate'),
+        city: uniqueValues('city'), // Populate city dropdown
+        state: uniqueValues('state') // Populate state dropdown
       });
 
       // Calculate hero stats
@@ -102,11 +102,13 @@ const findCars = async () => {
     setIsLoading(true);
     let url;
 
-    // Check the number of active filters
+    // Single Field Search
     if (activeFilters.length === 1) {
       const field = activeFilters[0];
       url = `https://localhost:7273/api/CarSearch/get-cars-by-${field}?${field}=${filters[field]}`;
-    } else if (activeFilters.length === 2) {
+    }
+    // Double Field Search
+    else if (activeFilters.length === 2) {
       const [field1, field2] = activeFilters;
       url = `https://localhost:7273/api/CarFilter/get-cars-by-${field1}-and-${field2}?${field1}=${filters[field1]}&${field2}=${filters[field2]}`;
     } else {
