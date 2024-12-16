@@ -34,54 +34,67 @@ const Dashboard = () => {
   const [dropdownData, setDropdownData] = useState({});
   const [activeFilters, setActiveFilters] = useState([]);
   const token = localStorage.getItem('token');
+  const [heroStats, setHeroStats] = useState({
+  totalCars: 0,
+  citiesServed: 0,
+  activeRentals: 0
+});
 
-  // Hero section statistics (mock data, replace with actual backend data)
-  const heroStats = {
-    totalCars: 150,
-    citiesServed: 10,
-    activeRentals: 45
-  };
+
 
   // Fetch dropdown data and featured cars
-  useEffect(() => {
-    const fetchDropdownAndFeaturedCars = async () => {
-      try {
-        const response = await fetch('https://localhost:7273/api/Car/get-all-cars', {
-          method: 'GET',
-          headers: {
-            accept: 'text/plain',
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch dropdown data');
+  // Fetch dropdown data, featured cars, and update hero stats
+useEffect(() => {
+  const fetchDropdownAndHeroStats = async () => {
+    try {
+      const response = await fetch('https://localhost:7273/api/Car/get-all-cars', {
+        method: 'GET',
+        headers: {
+          accept: 'text/plain',
+          Authorization: `Bearer ${token}`
         }
+      });
 
-        const data = await response.json();
-
-        const uniqueValues = (key) => [...new Set(data.map(car => car[key]))];
-
-        setDropdownData({
-          make: uniqueValues('make'),
-          model: uniqueValues('model'),
-          colour: uniqueValues('colour'),
-          price: uniqueValues('pricePerDay'),
-          seats: uniqueValues('totalSeats'),
-          availableStatus: ['Available', 'Not Available'],
-          availableDate: uniqueValues('availableDate')
-        });
-
-        // Filter featured cars (e.g., based on availability)
-        const featured = data.filter(car => car.availableStatus === true);
-        setFeaturedCars(featured.slice(0, 6)); // Display top 6 featured cars
-      } catch (err) {
-        setError(err.message);
+      if (!response.ok) {
+        throw new Error('Failed to fetch car data');
       }
-    };
 
-    fetchDropdownAndFeaturedCars();
-  }, [token]);
+      const data = await response.json();
+
+      const uniqueValues = (key) => [...new Set(data.map(car => car[key]))];
+
+      // Set dropdown data
+      setDropdownData({
+        make: uniqueValues('make'),
+        model: uniqueValues('model'),
+        colour: uniqueValues('colour'),
+        price: uniqueValues('pricePerDay'),
+        seats: uniqueValues('totalSeats'),
+        availableStatus: ['Available', 'Not Available'],
+        availableDate: uniqueValues('availableDate')
+      });
+
+      // Calculate hero stats
+      const totalCars = data.length;
+      const citiesServed = uniqueValues('city').length;
+      const activeRentals = data.filter(car => car.availableStatus === false).length;
+
+      setHeroStats({
+        totalCars,
+        citiesServed,
+        activeRentals
+      });
+
+      // Set featured cars (e.g., based on availability)
+      const featured = data.filter(car => car.availableStatus === true);
+      setFeaturedCars(featured.slice(0, 6)); // Display top 6 featured cars
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  fetchDropdownAndHeroStats();
+}, [token]);
 
   // Handle form submission
   const findCars = async () => {
