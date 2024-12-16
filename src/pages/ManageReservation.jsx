@@ -63,10 +63,44 @@ const ManageReservation = () => {
     alert(`Update reservation with ID: ${id}`);
   };
 
-  const handleDelete = (id) => {
-    setReservations(reservations.filter((reservation) => reservation.id !== id));
-    setDeleteConfirmation(null);
-  };
+  const handleDelete = async (licensePlate) => {
+  const userEmail = localStorage.getItem('email'); // Fetch email from localStorage
+  if (!userEmail) {
+    console.error('User email not found in localStorage');
+    return;
+  }
+
+  try {
+    // Call the Cancel API
+    const response = await fetch(
+      `https://localhost:7273/api/Reservation/Cancel?email=${encodeURIComponent(userEmail)}&licensePlate=${encodeURIComponent(licensePlate)}`,
+      {
+        method: 'POST',
+        headers: {
+          accept: '*/*',
+        },
+        body: '', // The body is empty as specified
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to cancel the reservation');
+    }
+
+    // Update the reservation status in the UI
+    setReservations((prevReservations) =>
+      prevReservations.map((reservation) =>
+        reservation.carNumber === licensePlate
+          ? { ...reservation, reservationStatus: 'Cancelled' }
+          : reservation
+      )
+    );
+
+    setDeleteConfirmation(null); // Close the delete confirmation dialog if any
+  } catch (error) {
+    console.error('Error canceling the reservation:', error);
+  }
+};
 
   const filteredReservations = reservations.filter(reservation => 
     reservation.carMake.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -75,17 +109,23 @@ const ManageReservation = () => {
   );
 
   const getStatusDisplay = (status) => {
-    switch(status) {
-      case 'Confirmed':
-        return {
-          icon: <CheckCircle className="mr-2" size={24} />,
-          text: 'Confirmed',
-          className: 'text-green-600 dark:text-green-400'
-        };
-      default:
-        return null;
-    }
-  };
+  switch (status) {
+    case 'Confirmed':
+      return {
+        icon: <CheckCircle className="mr-2" size={24} />,
+        text: 'Confirmed',
+        className: 'text-green-600 dark:text-green-400',
+      };
+    case 'Cancelled':
+      return {
+        icon: <XCircle className="mr-2" size={24} />,
+        text: 'Cancelled',
+        className: 'text-red-600 dark:text-red-400',
+      };
+    default:
+      return null;
+  }
+};
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 overflow-hidden">
@@ -197,7 +237,7 @@ const ManageReservation = () => {
                             Update
                           </button>
                           <button
-                            onClick={() => setDeleteConfirmation(reservation.carNumber)}
+                            onClick={() => handleDelete(reservation.carNumber)}
                             className="
                               flex items-center 
                               px-4 py-2 
@@ -209,7 +249,7 @@ const ManageReservation = () => {
                             "
                           >
                             <Trash2 className="mr-2" size={16} />
-                            Delete
+                            Cancel
                           </button>
                         </div>
                       </div>
