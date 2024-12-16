@@ -1,11 +1,19 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Moon, Sun } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext';
+import Tippy from '@tippyjs/react';
+import 'tippy.js/dist/tippy.css';
 
 const Navbar = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const location = useLocation();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token);
+  }, []);
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -35,18 +43,26 @@ const Navbar = () => {
         <div className="flex items-center space-x-6">
           <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-full p-1">
             {navLinks.map((link) => (
-              <Link
+              <Tippy
                 key={link.name}
-                to={link.path}
-                className={`
-                  px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 
-                  ${location.pathname === link.path 
-                    ? 'bg-blue-500 text-white shadow-md' 
-                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'}
-                `}
+                content={!isLoggedIn ? 'Please login to access this page' : ''}
+                disabled={isLoggedIn}
               >
-                {link.name}
-              </Link>
+                <span>
+                  <Link
+                    to={isLoggedIn ? link.path : '#'}
+                    className={`
+                      px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 
+                      ${location.pathname === link.path 
+                        ? 'bg-blue-500 text-white shadow-md' 
+                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'}
+                      ${!isLoggedIn ? 'cursor-not-allowed opacity-50' : ''}
+                    `}
+                  >
+                    {link.name}
+                  </Link>
+                </span>
+              </Tippy>
             ))}
           </div>
           
