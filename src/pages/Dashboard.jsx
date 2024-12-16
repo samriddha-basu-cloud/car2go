@@ -97,34 +97,42 @@ useEffect(() => {
 }, [token]);
 
   // Handle form submission
-  const findCars = async () => {
-    if (activeFilters.length !== 2) return;
+const findCars = async () => {
+  try {
+    setIsLoading(true);
+    let url;
 
-    const [field1, field2] = activeFilters;
-    const url = `https://localhost:7273/api/CarFilter/get-cars-by-${field1}-and-${field2}?${field1}=${filters[field1]}&${field2}=${filters[field2]}`;
-
-    try {
-      setIsLoading(true);
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          accept: 'text/plain',
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch cars');
-      }
-
-      const data = await response.json();
-      setCars(data);
-      setIsLoading(false);
-    } catch (err) {
-      setError(err.message);
-      setIsLoading(false);
+    // Check the number of active filters
+    if (activeFilters.length === 1) {
+      const field = activeFilters[0];
+      url = `https://localhost:7273/api/CarSearch/get-cars-by-${field}?${field}=${filters[field]}`;
+    } else if (activeFilters.length === 2) {
+      const [field1, field2] = activeFilters;
+      url = `https://localhost:7273/api/CarFilter/get-cars-by-${field1}-and-${field2}?${field1}=${filters[field1]}&${field2}=${filters[field2]}`;
+    } else {
+      throw new Error('Please select at least one filter');
     }
-  };
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        accept: 'text/plain',
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch cars');
+    }
+
+    const data = await response.json();
+    setCars(data);
+    setIsLoading(false);
+  } catch (err) {
+    setError(err.message);
+    setIsLoading(false);
+  }
+};
 
   const handleFilterChange = (field, value) => {
     setFilters(prev => ({ ...prev, [field]: value }));
@@ -331,7 +339,7 @@ useEffect(() => {
           <div className="text-center mt-8">
             <button
               onClick={findCars}
-              disabled={activeFilters.length !== 2}
+              disabled={activeFilters.length === 0}
               className={`
                 px-8 
                 py-3 
@@ -342,7 +350,7 @@ useEffect(() => {
                 shadow-lg 
                 hover:shadow-xl 
                 transition-all 
-                ${activeFilters.length === 2 
+                ${activeFilters.length > 0 
                   ? 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700' 
                   : 'bg-gray-300 cursor-not-allowed'}
               `}
