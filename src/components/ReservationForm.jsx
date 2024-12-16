@@ -1,61 +1,112 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
 const ReservationForm = () => {
   const [formData, setFormData] = useState({
-    model: '',
-    make: '',
-    color: '',
-    timePeriod: '',
-    location: '',
+    email: '',
+    licensePlate: '',
+    pickUpDate: '',
+    dropOffDate: ''
   });
 
-  // Predefined options for dropdowns
-  const options = {
-    make: ['Toyota', 'Honda', 'Ford', 'Tesla', 'BMW', 'Mercedes'],
-    model: ['Sedan', 'SUV', 'Truck', 'Coupe', 'Convertible', 'Hatchback'],
-    color: ['Red', 'Blue', 'Black', 'White', 'Silver', 'Gray'],
-    timePeriod: ['1 Day', '3 Days', '1 Week', '2 Weeks', '1 Month'],
-    location: ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix']
-  };
+  const [submitStatus, setSubmitStatus] = useState({
+    loading: false,
+    success: false,
+    error: null
+  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert('Reservation made successfully!');
-    console.log(formData);
+    setSubmitStatus({ loading: true, success: false, error: null });
+
+    try {
+      const response = await axios.post(
+        'https://localhost:7273/api/Reservation/reserve-car', 
+        formData,
+        {
+          headers: {
+            'accept': '*/*',
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      setSubmitStatus({ 
+        loading: false, 
+        success: true, 
+        error: null 
+      });
+
+      // Optional: Reset form after successful submission
+      setFormData({
+        email: '',
+        licensePlate: '',
+        pickUpDate: '',
+        dropOffDate: ''
+      });
+    } catch (error) {
+      setSubmitStatus({
+        loading: false,
+        success: false,
+        error: error.response?.data?.message || 'Reservation failed. Please try again.'
+      });
+    }
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 shadow-2xl rounded-2xl overflow-hidden transform transition-all duration-300 hover:scale-[1.01]">
+    <div className="bg-white dark:bg-gray-800 shadow-2xl rounded-2xl overflow-hidden transform transition-all duration-300 hover:scale-[1.01] max-w-md mx-auto">
       <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6">
-        <h2 className="text-3xl font-bold text-center text-white tracking-wider animate-fade-in">
+        <h2 className="text-3xl font-bold text-center text-white tracking-wider">
           Vehicle Reservation
         </h2>
       </div>
       
       <form onSubmit={handleSubmit} className="p-8 space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-4">
           {[
-            { name: 'make', label: 'Vehicle Make', options: options.make },
-            { name: 'model', label: 'Vehicle Model', options: options.model }
-          ].map(({ name, label, options }) => (
-            <div key={name} className="relative animate-slide-in-right">
+            { 
+              name: 'email', 
+              label: 'Email', 
+              type: 'email', 
+              placeholder: 'Enter your email'
+            },
+            { 
+              name: 'licensePlate', 
+              label: 'License Plate', 
+              type: 'text', 
+              placeholder: 'Enter license plate number'
+            },
+            { 
+              name: 'pickUpDate', 
+              label: 'Pick-up Date', 
+              type: 'date'
+            },
+            { 
+              name: 'dropOffDate', 
+              label: 'Drop-off Date', 
+              type: 'date'
+            }
+          ].map(({ name, label, type, placeholder }) => (
+            <div key={name} className="relative">
               <label 
                 htmlFor={name} 
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
                 {label}
               </label>
-              <select
+              <input
+                type={type}
                 name={name}
                 id={name}
                 value={formData[name]}
                 onChange={handleChange}
                 required
+                placeholder={placeholder}
                 className="
                   w-full px-4 py-3 
                   border border-gray-300 dark:border-gray-600 
@@ -65,84 +116,26 @@ const ReservationForm = () => {
                   focus:ring-2 focus:ring-blue-500 focus:border-blue-500
                   transition-all duration-300
                 "
-              >
-                <option value="">Select {label}</option>
-                {options.map(option => (
-                  <option key={option} value={option}>{option}</option>
-                ))}
-              </select>
+              />
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {[
-            { name: 'color', label: 'Vehicle Color', options: options.color },
-            { name: 'timePeriod', label: 'Reservation Duration', options: options.timePeriod }
-          ].map(({ name, label, options }) => (
-            <div key={name} className="relative animate-slide-in-left">
-              <label 
-                htmlFor={name} 
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-              >
-                {label}
-              </label>
-              <select
-                name={name}
-                id={name}
-                value={formData[name]}
-                onChange={handleChange}
-                required
-                className="
-                  w-full px-4 py-3 
-                  border border-gray-300 dark:border-gray-600 
-                  rounded-lg 
-                  text-gray-900 dark:text-gray-100 
-                  bg-white dark:bg-gray-700
-                  focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                  transition-all duration-300
-                "
-              >
-                <option value="">Select {label}</option>
-                {options.map(option => (
-                  <option key={option} value={option}>{option}</option>
-                ))}
-              </select>
-            </div>
-          ))}
-        </div>
+        {submitStatus.error && (
+          <div className="text-red-500 text-sm text-center mb-4">
+            {submitStatus.error}
+          </div>
+        )}
 
-        <div className="relative animate-slide-in-up">
-          <label 
-            htmlFor="location" 
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-          >
-            Pickup Location
-          </label>
-          <select
-            name="location"
-            id="location"
-            value={formData.location}
-            onChange={handleChange}
-            required
-            className="
-              w-full px-4 py-3 
-              border border-gray-300 dark:border-gray-600 
-              rounded-lg 
-              text-gray-900 dark:text-gray-100 
-              bg-white dark:bg-gray-700
-              focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-            "
-          >
-            <option value="">Select Location</option>
-            {options.location.map(location => (
-              <option key={location} value={location}>{location}</option>
-            ))}
-          </select>
-        </div>
+        {submitStatus.success && (
+          <div className="text-green-500 text-sm text-center mb-4">
+            Reservation successful!
+          </div>
+        )}
 
         <button 
           type="submit" 
+          disabled={submitStatus.loading}
           className="
             w-full py-4 
             bg-gradient-to-r from-blue-600 to-indigo-700 
@@ -155,10 +148,11 @@ const ReservationForm = () => {
             focus:ring-2 
             focus:ring-blue-500 
             focus:ring-opacity-50
-            animate-bounce-in
+            disabled:opacity-50
+            disabled:cursor-not-allowed
           "
         >
-          Complete Reservation
+          {submitStatus.loading ? 'Submitting...' : 'Complete Reservation'}
         </button>
       </form>
     </div>
