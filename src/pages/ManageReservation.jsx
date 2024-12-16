@@ -28,7 +28,7 @@ const ManageReservation = () => {
   useEffect(() => {
     const fetchReservations = async () => {
       try {
-        const userEmail = localStorage.getItem('userEmail'); // Fetch email from localStorage
+        const userEmail = localStorage.getItem('email'); // Fetch email from localStorage
         if (!userEmail) {
           throw new Error('User email not found in localStorage');
         }
