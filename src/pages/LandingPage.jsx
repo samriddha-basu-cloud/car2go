@@ -199,8 +199,8 @@ const LandingPage = () => {
           </div>
         </div>
 
-        {/* Reviews Section */}
-        <div className="mb-16 mt-16">
+
+        {/* <div className="mb-16 mt-16">
           <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200 text-center mb-8">
             What Our Customers Say
           </h2>
@@ -237,10 +237,10 @@ const LandingPage = () => {
 
 
           {/* Review Submission section */}
-            <div className="mt-16">
+           {/*} <div className="mt-16">
               <ReviewSubmission />
             </div>
-          </div>
+          </div> */}
 
         
       </div>
