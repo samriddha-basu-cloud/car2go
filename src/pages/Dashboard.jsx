@@ -2,7 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { 
   Car, 
   ChevronRight, 
-  Search
+  Search,
+  MapPin,
+  PaletteIcon,
+  DollarSign,
+  Users,
+  CheckCircle2,
+  XCircle
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -107,103 +113,191 @@ const Dashboard = () => {
 
   const isFieldDisabled = (field) => !activeFilters.includes(field) && activeFilters.length >= 2;
 
+  const CarCard = ({ car, featured = false }) => (
+    <div className={`
+      transform transition-all duration-300 
+      ${featured ? 'hover:scale-105' : 'hover:scale-102'}
+      bg-white dark:bg-gray-800 
+      rounded-2xl 
+      overflow-hidden 
+      shadow-lg 
+      hover:shadow-2xl 
+      border border-gray-100 
+      dark:border-gray-700
+    `}>
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">
+            {car.make} {car.model}
+          </h3>
+          {featured && (
+            <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full dark:bg-blue-900 dark:text-blue-300">
+              Featured
+            </span>
+          )}
+        </div>
+
+        <div className="space-y-3">
+          <div className="flex items-center text-gray-600 dark:text-gray-400">
+            <PaletteIcon className="mr-2 w-5 h-5 text-blue-500" />
+            <span>Colour: {car.colour}</span>
+          </div>
+          <div className="flex items-center text-gray-600 dark:text-gray-400">
+            <DollarSign className="mr-2 w-5 h-5 text-green-500" />
+            <span>₹{car.pricePerDay}/day</span>
+          </div>
+          <div className="flex items-center text-gray-600 dark:text-gray-400">
+            <Users className="mr-2 w-5 h-5 text-purple-500" />
+            <span>{car.totalSeats} Seats</span>
+          </div>
+          <div className="flex items-center">
+            {car.availableStatus ? (
+              <>
+                <CheckCircle2 className="mr-2 w-5 h-5 text-green-500" />
+                <span className="text-green-600">Available</span>
+              </>
+            ) : (
+              <>
+                <XCircle className="mr-2 w-5 h-5 text-red-500" />
+                <span className="text-red-600">Booked</span>
+              </>
+            )}
+          </div>
+        </div>
+
+        <Link 
+          to={`/car/${car.licensePlate}`} 
+          className="
+            mt-6 
+            w-full 
+            inline-flex 
+            items-center 
+            justify-center 
+            px-4 
+            py-2 
+            bg-gradient-to-r 
+            from-blue-500 
+            to-indigo-600 
+            text-white 
+            rounded-lg 
+            hover:from-blue-600 
+            hover:to-indigo-700 
+            transition-all 
+            focus:outline-none 
+            focus:ring-2 
+            focus:ring-blue-500 
+            focus:ring-offset-2
+          "
+        >
+          View Details
+          <ChevronRight className="ml-2 w-5 h-5" />
+        </Link>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 relative overflow-hidden">
       {/* Main Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Search Filters */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Dropdown Fields */}
+        <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 mb-12">
+          <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-gray-200 mb-6 flex justify-center items-center">
+            <Search className="mr-3 text-blue-600 dark:text-blue-400" />
+            Find Your Perfect Car
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {Object.keys(filters).map((field, index) => (
-              <select
-                key={index}
-                disabled={isFieldDisabled(field)}
-                value={filters[field]}
-                onChange={(e) => handleFilterChange(field, e.target.value)}
-                className={`bg-gray-50 dark:bg-gray-700 p-3 rounded-xl focus:outline-none ${isFieldDisabled(field) && 'cursor-not-allowed opacity-50'}`}
-              >
-                <option value="">{`Select ${field.charAt(0).toUpperCase() + field.slice(1)}`}</option>
-                {dropdownData[field]?.map((option, index) => (
-                  <option key={index} value={option}>{option}</option>
-                ))}
-              </select>
+              <div key={index} className="relative">
+                <label 
+                  htmlFor={field} 
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
+                  {field.charAt(0).toUpperCase() + field.slice(1)}
+                </label>
+                <select
+                  id={field}
+                  disabled={isFieldDisabled(field)}
+                  value={filters[field]}
+                  onChange={(e) => handleFilterChange(field, e.target.value)}
+                  className={`
+                    w-full 
+                    bg-gray-50 
+                    dark:bg-gray-700 
+                    border 
+                    border-gray-300 
+                    dark:border-gray-600 
+                    rounded-xl 
+                    p-3 
+                    focus:ring-2 
+                    focus:ring-blue-500 
+                    transition-all 
+                    ${isFieldDisabled(field) && 'cursor-not-allowed opacity-50'}
+                  `}
+                >
+                  <option value="">{`Select ${field.charAt(0).toUpperCase() + field.slice(1)}`}</option>
+                  {dropdownData[field]?.map((option, index) => (
+                    <option key={index} value={option}>{option}</option>
+                  ))}
+                </select>
+              </div>
             ))}
           </div>
 
-          <div className="text-center mt-6">
+          <div className="text-center mt-8">
             <button
               onClick={findCars}
               disabled={activeFilters.length !== 2}
-              className={`px-6 py-3 rounded-xl text-white shadow-lg hover:shadow-xl transition-all ${activeFilters.length === 2 ? 'bg-gradient-to-r from-blue-500 to-indigo-600' : 'bg-gray-300 cursor-not-allowed'}`}
+              className={`
+                px-8 
+                py-3 
+                rounded-xl 
+                text-white 
+                text-lg 
+                font-semibold 
+                shadow-lg 
+                hover:shadow-xl 
+                transition-all 
+                ${activeFilters.length === 2 
+                  ? 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700' 
+                  : 'bg-gray-300 cursor-not-allowed'}
+              `}
             >
               Find Cars
             </button>
           </div>
         </div>
 
-        {/* Featured Cars */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 flex items-center">
-            <Car className="mr-3 text-blue-600 dark:text-blue-400" />
-            Featured Cars
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-            {featuredCars.map(car => (
-              <div key={car.licensePlate} className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all">
-                <h3 className="text-lg font-bold">{car.make} {car.model}</h3>
-                <p>Colour: {car.colour}</p>
-                <p>₹{car.pricePerDay}/day</p>
-                <p>Seats: {car.totalSeats}</p>
-                <p className={`text-sm ${car.availableStatus ? 'text-green-600' : 'text-red-600'}`}>
-                  {car.availableStatus ? 'Available' : 'Booked'}
-                </p>
-                <Link 
-                  to={`/car/${car.licensePlate}`} 
-                  className="mt-4 inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all"
-                >
-                  View Details
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Search Results */}
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 flex items-center">
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 flex items-center mb-6">
             <Car className="mr-3 text-blue-600 dark:text-blue-400" />
             Search Results
           </h2>
           {isLoading ? (
             <div className="text-center py-8">
-              <p>Loading cars...</p>
+              <p className="text-gray-600 dark:text-gray-300">Loading cars...</p>
             </div>
           ) : error ? (
             <div className="text-center py-8">
               <p className="text-red-600">Error: {error}</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-              {cars.map(car => (
-                <div key={car.licensePlate} className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-                  <h3 className="text-lg font-bold">{car.make} {car.model}</h3>
-                  <p>Colour: {car.colour}</p>
-                  <p>₹{car.pricePerDay}/day</p>
-                  <p>Seats: {car.totalSeats}</p>
-                  <p className={`text-sm ${car.availableStatus ? 'text-green-600' : 'text-red-600'}`}>
-                    {car.availableStatus ? 'Available' : 'Booked'}
-                  </p>
-                  <Link 
-                    to={`/car/${car.licensePlate}`} 
-                    className="mt-4 inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all"
-                  >
-                    View Details
-                  </Link>
-                </div>
-              ))}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {cars.map(car => <CarCard key={car.licensePlate} car={car} />)}
             </div>
           )}
+        </div>
+
+        {/* Featured Cars */}
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 flex items-center mb-6">
+            <Car className="mr-3 text-blue-600 dark:text-blue-400" />
+            Featured Cars
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {featuredCars.map(car => <CarCard key={car.licensePlate} car={car} featured={true} />)}
+          </div>
         </div>
       </div>
     </div>
