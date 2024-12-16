@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Edit2, Save, Trash2, LogOut, Bell, MapPin } from 'lucide-react';
 
 const SettingsPage = () => {
@@ -22,6 +23,8 @@ const SettingsPage = () => {
     action: null,
     message: '',
   });
+
+  const navigate = useNavigate();
 
   const fetchUserData = async () => {
     try {
@@ -83,9 +86,34 @@ const SettingsPage = () => {
   const handleDeleteAccount = () => {
     setConfirmationModal({
       isOpen: true,
-      action: () => {
-        alert('Account deleted. This action is irreversible.');
-        closeModal();
+      action: async () => {
+        try {
+          const token = localStorage.getItem('token');
+          const email = localStorage.getItem('email');
+
+          const response = await fetch(
+            `https://localhost:7273/api/User/delete-user?email=${encodeURIComponent(email)}`,
+            {
+              method: 'DELETE',
+              headers: {
+                Accept: '*/*',
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`Failed to delete account. Status: ${response.status}`);
+          }
+
+          alert('Account deleted successfully!');
+          closeModal();
+          localStorage.clear();
+          navigate('/');
+        } catch (error) {
+          alert(`Error: ${error.message}`);
+          closeModal();
+        }
       },
       message: 'Are you sure you want to delete your account? This action cannot be undone.',
     });
@@ -95,8 +123,10 @@ const SettingsPage = () => {
     setConfirmationModal({
       isOpen: true,
       action: () => {
+        localStorage.clear();
         alert('You have been logged out.');
         closeModal();
+        navigate('/');
       },
       message: 'Are you sure you want to log out?',
     });
@@ -212,18 +242,6 @@ const SettingsPage = () => {
                 type="checkbox"
                 checked={permissions.smsNotifications}
                 onChange={() => handlePermissionChange('smsNotifications')}
-                className="toggle-checkbox"
-              />
-            </div>
-            <div className="flex justify-between items-center">
-              <div className="flex items-center space-x-4">
-                <MapPin className="w-6 h-6 text-purple-500" />
-                <span className="text-gray-800 dark:text-gray-200">Location Access</span>
-              </div>
-              <input
-                type="checkbox"
-                checked={permissions.locationAccess}
-                onChange={() => handlePermissionChange('locationAccess')}
                 className="toggle-checkbox"
               />
             </div>
