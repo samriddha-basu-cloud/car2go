@@ -7,7 +7,8 @@ const Navbar = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const location = useLocation();
 
-  const token = localStorage.getItem('token'); // Check if token is present in localStorage
+  // Check if token exists in localStorage
+  const token = localStorage.getItem('token');
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -21,8 +22,8 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 w-full z-50 backdrop-blur-md bg-white/80 dark:bg-gray-900/80 shadow-sm">
       <div className="container mx-auto flex justify-between items-center px-4 py-3">
         <div className="flex items-center">
-          <Link 
-            to="/" 
+          <Link
+            to="/"
             className="flex items-center space-x-2 group"
           >
             <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center transition-transform group-hover:rotate-12">
@@ -33,43 +34,39 @@ const Navbar = () => {
             </span>
           </Link>
         </div>
-        
+
         <div className="flex items-center space-x-6">
           <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-full p-1">
             {navLinks.map((link) => (
-              <div 
-                key={link.name} 
+              <div
+                key={link.name}
                 className="relative group"
               >
                 <Link
                   to={token ? link.path : '#'}
                   className={`
                     px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 
-                    ${location.pathname === link.path && token
-                      ? 'bg-blue-500 text-white shadow-md' 
-                      : token
-                      ? 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
-                      : 'text-gray-400 cursor-not-allowed'}
+                    ${location.pathname === link.path
+                      ? 'bg-blue-500 text-white shadow-md'
+                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'}
+                    ${!token && 'opacity-50 pointer-events-none'}
                   `}
-                  onClick={(e) => {
-                    if (!token) e.preventDefault(); // Prevent navigation if no token
-                  }}
                 >
                   {link.name}
                 </Link>
                 {!token && (
-                  <div 
-                    className="absolute bottom-12 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-black text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  <span
+                    className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs bg-gray-700 text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     Please log in to access
-                  </div>
+                  </span>
                 )}
               </div>
             ))}
           </div>
-          
-          <button 
-            onClick={toggleTheme} 
+
+          <button
+            onClick={toggleTheme}
             className="
               p-2 rounded-full 
               bg-gray-200 dark:bg-gray-700 
