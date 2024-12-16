@@ -6,10 +6,7 @@ const SettingsPage = () => {
   const [userDetails, setUserDetails] = useState({
     name: '',
     email: '',
-    location: '',
     phoneNumber: '',
-    drivingLicense: '',
-    aadhaarNumber: '',
     password: '',
   });
   const [permissions, setPermissions] = useState({
@@ -52,9 +49,6 @@ const SettingsPage = () => {
         name: `${data.firstName} ${data.lastName}`,
         email: data.email,
         phoneNumber: data.phoneNumber,
-        location: 'New York, USA', // Replace with actual location if available
-        drivingLicense: '',
-        aadhaarNumber: '',
         password: data.password,
       });
     } catch (err) {
@@ -159,41 +153,35 @@ const SettingsPage = () => {
             </button>
           </div>
           <div className="space-y-4">
-            {['name', 'email', 'location', 'phoneNumber', 'drivingLicense', 'aadhaarNumber', 'password'].map(
-              (field) => (
-                <div key={field} className="flex items-center space-x-4">
-                  <label
-                    className="text-gray-600 dark:text-gray-400 w-36 capitalize"
-                    htmlFor={field}
-                  >
-                    {field === 'phoneNumber'
-                      ? 'Phone'
-                      : field === 'drivingLicense'
-                      ? 'Driving License'
-                      : field === 'aadhaarNumber'
-                      ? 'Aadhaar'
-                      : field === 'password'
-                      ? 'Password'
-                      : field}
-                    :
-                  </label>
-                  {editMode ? (
-                    <input
-                      id={field}
-                      type={field === 'password' ? 'password' : 'text'}
-                      name={field}
-                      value={userDetails[field]}
-                      onChange={handleChange}
-                      className="w-full bg-gray-50 dark:bg-gray-700 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-200"
-                    />
-                  ) : (
-                    <p className="text-gray-800 dark:text-gray-200">
-                      {field === 'password' ? '********' : userDetails[field]}
-                    </p>
-                  )}
-                </div>
-              )
-            )}
+            {['name', 'email', 'phoneNumber', 'password'].map((field) => (
+              <div key={field} className="flex items-center space-x-4">
+                <label
+                  className="text-gray-600 dark:text-gray-400 w-36 capitalize"
+                  htmlFor={field}
+                >
+                  {field === 'phoneNumber'
+                    ? 'Phone'
+                    : field === 'password'
+                    ? 'Password'
+                    : field}
+                  :
+                </label>
+                {editMode ? (
+                  <input
+                    id={field}
+                    type={field === 'password' ? 'password' : 'text'}
+                    name={field}
+                    value={userDetails[field]}
+                    onChange={handleChange}
+                    className="w-full bg-gray-50 dark:bg-gray-700 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-200"
+                  />
+                ) : (
+                  <p className="text-gray-800 dark:text-gray-200">
+                    {field === 'password' ? '********' : userDetails[field]}
+                  </p>
+                )}
+              </div>
+            ))}
           </div>
         </div>
 
