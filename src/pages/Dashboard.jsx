@@ -41,6 +41,82 @@ const [filters, setFilters] = useState({
   city: '', // New field
   state: '' // New field
 });
+const [userLocation, setUserLocation] = useState({ city: '', state: '' });
+
+useEffect(() => {
+  const fetchUserLocationAndCars = async () => {
+    try {
+      // Fetch user location
+      if (!navigator.geolocation) {
+        throw new Error("Geolocation is not supported by this browser.");
+      }
+
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        // Replace this with your preferred geocoding API
+        const geocodingUrl = `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=YOUR_GEOCODING_API_KEY`;
+
+        const geoResponse = await fetch(geocodingUrl);
+        if (!geoResponse.ok) {
+          throw new Error("Failed to fetch location data.");
+        }
+
+        const geoData = await geoResponse.json();
+        const city = geoData.results[0].components.city || geoData.results[0].components.town;
+        const state = geoData.results[0].components.state;
+
+        // Fetch cars by city or state
+        const carResponse = await fetch(
+          `https://localhost:7273/api/CarSearch/get-cars-by-city?city=${city}`,
+          {
+            method: 'GET',
+            headers: {
+              accept: 'text/plain',
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+
+        if (carResponse.ok) {
+          const cityCars = await carResponse.json();
+          if (cityCars.length > 0) {
+            setCars(cityCars);
+          } else {
+            // Fallback to state if no cars in the city
+            const stateResponse = await fetch(
+              `https://localhost:7273/api/CarSearch/get-cars-by-state?state=${state}`,
+              {
+                method: 'GET',
+                headers: {
+                  accept: 'text/plain',
+                  Authorization: `Bearer ${token}`
+                }
+              }
+            );
+
+            if (stateResponse.ok) {
+              const stateCars = await stateResponse.json();
+              if (stateCars.length > 0) {
+                setCars(stateCars);
+              } else {
+                setError(`Sorry, we don't have any cars available in your city (${city}) or state (${state}).`);
+              }
+            } else {
+              setError(`Sorry, we don't have any cars available in your city (${city}) or state (${state}).`);
+            }
+          }
+        } else {
+          setError(`Sorry, we don't have any cars available in your city (${city}) or state (${state}).`);
+        }
+      });
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  fetchUserLocationAndCars();
+}, [token]);
 
 useEffect(() => {
   const fetchDropdownAndHeroStats = async () => {
@@ -382,6 +458,26 @@ const findCars = async () => {
             </div>
           )}
         </div>
+
+        <div className="mb-12">
+  <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 flex items-center mb-6">
+    <Car className="mr-3 text-blue-600 dark:text-blue-400" />
+    Cars Available in Your Location
+  </h2>
+  {isLoading ? (
+    <div className="text-center py-8">
+      <p className="text-gray-600 dark:text-gray-300">Loading cars in your location...</p>
+    </div>
+  ) : error ? (
+    <div className="text-center py-8">
+      <p className="text-red-600">{error}</p>
+    </div>
+  ) : (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {cars.map(car => <CarCard key={car.licensePlate} car={car} />)}
+    </div>
+  )}
+</div>
 
         {/* Featured Cars */}
         <div>
