@@ -58,7 +58,14 @@ const LoginRegisterPage = () => {
         throw new Error(errorText || 'Login failed');
       }
 
-      const result = await response.text();
+      const result = await response.json();
+      
+      // Store login information in local storage
+      localStorage.setItem('token', result.token);
+      localStorage.setItem('refreshToken', result.refreshToken);
+      localStorage.setItem('role', JSON.stringify(result.role));
+      localStorage.setItem('email', formData.email);
+      
       console.log('Login successful:', result);
       // Redirect to home
       navigate('/');
