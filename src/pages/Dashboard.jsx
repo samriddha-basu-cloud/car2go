@@ -15,9 +15,10 @@ import {
   BuildingIcon,
   FlagIcon
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [cars, setCars] = useState([]);
   const [featuredCars, setFeaturedCars] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -232,10 +233,16 @@ const findCars = async () => {
 
   const isFieldDisabled = (field) => !activeFilters.includes(field) && activeFilters.length >= 2;
 
-  const CarCard = ({ car, featured = false }) => (
-    <div className={`
-      transform transition-all duration-300 
-      ${featured ? 'hover:scale-105' : 'hover:scale-102'}
+  const CarCard = ({ car, featured = false }) => {
+    const handleViewDetails = () => {
+      // Navigate to car details page and pass the entire car object as state
+      navigate(`/car/${car.licensePlate}`, { state: { carDetails: car } });
+    };
+
+    return (
+      <div className={`
+        transform transition-all duration-300 
+        ${featured ? 'hover:scale-105' : 'hover:scale-102'}
       bg-white dark:bg-gray-800 
       rounded-2xl 
       overflow-hidden 
@@ -331,6 +338,7 @@ const findCars = async () => {
       </div>
     </div>
   );
+};
 
 
   return (
