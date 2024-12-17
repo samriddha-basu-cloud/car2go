@@ -28,7 +28,7 @@ const ReservationForm = () => {
 
     try {
       const response = await axios.post(
-        'https://localhost:7273/api/Reservation/reserve-car', 
+        'https://localhost:7273/api/Reservation/reserve-car',
         formData,
         {
           headers: {
@@ -51,10 +51,10 @@ const ReservationForm = () => {
         });
       }
 
-      setSubmitStatus({ 
-        loading: false, 
-        success: response.data.message === "Reservation created successfully.", 
-        error: null 
+      setSubmitStatus({
+        loading: false,
+        success: response.data.message === "Reservation created successfully.",
+        error: null
       });
     } catch (error) {
       setPopupMessage(error.response?.data?.message || 'Reservation failed. Please try again.');
@@ -77,7 +77,6 @@ const ReservationForm = () => {
           Vehicle Reservation
         </h2>
       </div>
-      
       <form onSubmit={handleSubmit} className="p-8 space-y-6">
         <div className="space-y-4">
           {[

@@ -70,7 +70,7 @@ const LoginRegisterPage = () => {
 
     // Redirect based on the role
     if (result.role.includes('Admin')) {
-      navigate('/admindashboard');
+      navigate('/admin-dashboard');
     } else if (result.role.includes('Agent')) {
       navigate('/agentdashboard');
     } else if (result.role.includes('User')) {
