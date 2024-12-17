@@ -9,6 +9,8 @@ import MakeReservation from './pages/MakeReservation';
 import ManageReservation from './pages/ManageReservation';
 import SettingsPage from './pages/SettingsPage';
 import CarDetailsPage from './pages/CarDetailsPage';
+import AdminDashboard from './pages/AdminDashboard';
+import AgentDashboard from './pages/AgentDashboard';
 
 const App = () => {
   const location = useLocation();
@@ -21,6 +23,8 @@ const App = () => {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginRegisterPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
+          <Route path="/agent-dashboard" element={<AgentDashboard />} />
           <Route path="/make-reservation" element={<MakeReservation />} />
           <Route path="/manage-reservation" element={<ManageReservation />} />
           <Route path="/settings" element={<SettingsPage />} />

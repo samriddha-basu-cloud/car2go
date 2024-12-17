@@ -36,46 +36,55 @@ const LoginRegisterPage = () => {
   };
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setError(null);
-    setIsLoading(true);
+  e.preventDefault();
+  setError(null);
+  setIsLoading(true);
 
-    const formDataToSend = new FormData();
-    formDataToSend.append('email', formData.email);
-    formDataToSend.append('password', formData.password);
+  const formDataToSend = new FormData();
+  formDataToSend.append('email', formData.email);
+  formDataToSend.append('password', formData.password);
 
-    try {
-      const response = await fetch('https://localhost:7273/api/Auth/Login', {
-        method: 'POST',
-        headers: {
-          accept: '*/*',
-        },
-        body: formDataToSend,
-      });
+  try {
+    const response = await fetch('https://localhost:7273/api/Auth/Login', {
+      method: 'POST',
+      headers: {
+        accept: '*/*',
+      },
+      body: formDataToSend,
+    });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Login failed');
-      }
-
-      const result = await response.json();
-      
-      // Store login information in local storage
-      localStorage.setItem('token', result.token);
-      localStorage.setItem('refreshToken', result.refreshToken);
-      localStorage.setItem('role', JSON.stringify(result.role));
-      localStorage.setItem('email', formData.email);
-      
-      console.log('Login successful:', result);
-      // Redirect to home
-      navigate('/');
-    } catch (err) {
-      setError(err.message);
-      console.error('Login error:', err);
-    } finally {
-      setIsLoading(false);
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Login failed');
     }
-  };
+
+    const result = await response.json();
+
+    // Store login information in local storage
+    localStorage.setItem('token', result.token);
+    localStorage.setItem('refreshToken', result.refreshToken);
+    localStorage.setItem('role', JSON.stringify(result.role));
+    localStorage.setItem('email', formData.email);
+
+    console.log('Login successful:', result);
+
+    // Redirect based on the role
+    if (result.role.includes('Admin')) {
+      navigate('/admindashboard');
+    } else if (result.role.includes('Agent')) {
+      navigate('/agentdashboard');
+    } else if (result.role.includes('User')) {
+      navigate('/dashboard');
+    } else {
+      throw new Error('Invalid role: Access denied.');
+    }
+  } catch (err) {
+    setError(err.message);
+    console.error('Login error:', err);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleRegister = async (e) => {
     e.preventDefault();

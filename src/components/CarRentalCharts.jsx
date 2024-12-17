@@ -1,0 +1,155 @@
+import React, { useState } from 'react';
+import { 
+  BarChart, Bar, PieChart, Pie, LineChart, Line, 
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell, ResponsiveContainer 
+} from 'recharts';
+import { BarChart as BarIcon, PieChart as PieIcon, LineChart as LineIcon } from 'lucide-react';
+
+const CarRentalCharts = () => {
+  const [chartType1, setChartType1] = useState('bar');
+  const [chartType2, setChartType2] = useState('pie');
+
+  // Adjusted mock data 
+  const carData = [
+    { name: 'Rented', value: 20, total: 50 },
+    { name: 'Available', value: 30, total: 50 }
+  ];
+
+  const userData = [
+    { name: 'Rented', value: 25, total: 100 },
+    { name: 'Inactive', value: 75, total: 100 }
+  ];
+
+  // Professional color palette
+  const COLORS = ['#3B82F6', '#10B981', '#F43F5E', '#8B5CF6'];
+
+  // Chart type options
+  const chartTypes = [
+    { type: 'bar', icon: BarIcon },
+    { type: 'pie', icon: PieIcon },
+    { type: 'line', icon: LineIcon }
+  ];
+
+  // Render dynamic chart based on type
+  const renderChart = (data, title, chartType, setChartType) => (
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
+      {/* Chart Type Selector */}
+      <div className="flex justify-center py-3 border-b border-gray-200 dark:border-gray-700">
+        <div className="inline-flex bg-gray-100 dark:bg-gray-700 rounded-full p-1 space-x-1">
+          {chartTypes.map((type) => (
+            <button
+              key={type.type}
+              onClick={() => setChartType(type.type)}
+              className={`p-2 rounded-full transition-colors duration-200 ${
+                chartType === type.type 
+                  ? 'bg-blue-500 text-white' 
+                  : 'text-gray-500 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
+            >
+              <type.icon className="w-5 h-5" />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Chart Title */}
+      <h3 className="text-center text-lg font-semibold text-gray-800 dark:text-gray-200 pt-4">
+        {title}
+      </h3>
+
+      {/* Responsive Chart Container */}
+      <ResponsiveContainer width="100%" height={300}>
+        {chartType === 'bar' ? (
+          <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+            <XAxis dataKey="name" axisLine={false} tickLine={false} />
+            <YAxis 
+              domain={[0, (dataMax) => Math.max(...data.map(d => d.total))]} 
+              axisLine={false} 
+              tickLine={false} 
+            />
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: '#fff', 
+                borderRadius: '12px', 
+                boxShadow: '0 4px 6px rgba(0,0,0,0.1)' 
+              }} 
+            />
+            <Bar dataKey="value" fill="#3B82F6" radius={[10, 10, 0, 0]}>
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              ))}
+            </Bar>
+          </BarChart>
+        ) : chartType === 'pie' ? (
+          <PieChart>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              labelLine={false}
+              outerRadius={100}
+              fill="#8884d8"
+              dataKey="value"
+              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+            >
+              {data.map((entry, index) => (
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={COLORS[index % COLORS.length]} 
+                />
+              ))}
+            </Pie>
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: '#fff', 
+                borderRadius: '12px', 
+                boxShadow: '0 4px 6px rgba(0,0,0,0.1)' 
+              }} 
+            />
+            <Legend 
+              layout="horizontal" 
+              verticalAlign="bottom" 
+              align="center"
+              iconType="circle"
+            />
+          </PieChart>
+        ) : (
+          <LineChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+            <XAxis dataKey="name" axisLine={false} tickLine={false} />
+            <YAxis 
+              domain={[0, (dataMax) => Math.max(...data.map(d => d.total))]} 
+              axisLine={false} 
+              tickLine={false} 
+            />
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: '#fff', 
+                borderRadius: '12px', 
+                boxShadow: '0 4px 6px rgba(0,0,0,0.1)' 
+              }} 
+            />
+            <Line 
+              type="monotone" 
+              dataKey="value" 
+              stroke="#3B82F6" 
+              strokeWidth={3}
+              dot={{ r: 6, strokeWidth: 2, fill: '#fff' }}
+              activeDot={{ r: 8, stroke: '#3B82F6', strokeWidth: 2, fill: '#fff' }}
+            />
+          </LineChart>
+        )}
+      </ResponsiveContainer>
+    </div>
+  );
+
+  return (
+    <div className="grid md:grid-cols-2 gap-6">
+      {renderChart(carData, 'Car Rental Status', chartType1, setChartType1)}
+      {renderChart(userData, 'User Rental Activity', chartType2, setChartType2)}
+    </div>
+  );
+};
+
+export default CarRentalCharts;

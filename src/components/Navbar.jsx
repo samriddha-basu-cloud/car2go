@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, Settings } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext';
 
 const Navbar = () => {
@@ -9,14 +9,22 @@ const Navbar = () => {
 
   // Check if token exists in localStorage
   const token = localStorage.getItem('token');
+  
+  // Get user roles from localStorage
+  const roles = JSON.parse(localStorage.getItem('role') || '[]');
+  
+  // Determine if user is an Admin or Agent
+  const isAdminOrAgent = roles.some(role => ['Admin', 'Agent'].includes(role));
 
-  const navLinks = [
-    { name: 'Home', path: '/' },
-    { name: 'Dashboard', path: '/dashboard' },
-    { name: 'Make Reservation', path: '/make-reservation' },
-    { name: 'Manage Reservations', path: '/manage-reservation' },
-    { name: 'Settings', path: '/settings' },
-  ];
+  const navLinks = isAdminOrAgent 
+    ? [{ name: 'Settings', path: '/settings', icon: Settings }] 
+    : [
+        { name: 'Home', path: '/' },
+        { name: 'Dashboard', path: '/dashboard' },
+        { name: 'Make Reservation', path: '/make-reservation' },
+        { name: 'Manage Reservations', path: '/manage-reservation' },
+        { name: 'Settings', path: '/settings' },
+      ];
 
   return (
     <nav className="fixed top-0 left-0 w-full z-50 backdrop-blur-md bg-white/80 dark:bg-gray-900/80 shadow-sm">
@@ -50,9 +58,14 @@ const Navbar = () => {
                       ? 'bg-blue-500 text-white shadow-md'
                       : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'}
                     ${!token && 'opacity-50 pointer-events-none'}
+                    flex items-center justify-center
                   `}
                 >
-                  {link.name}
+                  {link.icon ? (
+                    <link.icon className="w-5 h-5" />
+                  ) : (
+                    link.name
+                  )}
                 </Link>
                 {!token && (
                   <span
