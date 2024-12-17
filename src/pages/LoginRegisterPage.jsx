@@ -72,7 +72,7 @@ const LoginRegisterPage = () => {
     if (result.role.includes('Admin')) {
       navigate('/admin-dashboard');
     } else if (result.role.includes('Agent')) {
-      navigate('/agentdashboard');
+      navigate('/agent-dashboard');
     } else if (result.role.includes('User')) {
       navigate('/dashboard');
     } else {
