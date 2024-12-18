@@ -28,7 +28,7 @@ const App = () => {
           <Route path="/make-reservation" element={<MakeReservation />} />
           <Route path="/manage-reservation" element={<ManageReservation />} />
           <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/car/:carId" element={<CarDetailsPage />} />
+          <Route path="/car/:licensePlate" element={<CarDetailsPage />} />
         </Routes>
       </main>
       <Footer />

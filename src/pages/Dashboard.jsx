@@ -308,8 +308,9 @@ const findCars = async () => {
           </div>
         </div>
 
-        <Link 
-          to={`/car/${car.licensePlate}`} 
+        <Link
+          to={`/car/${car.licensePlate}`}
+          state={{ carDetails: car }}
           className="
             mt-6 
             w-full 
