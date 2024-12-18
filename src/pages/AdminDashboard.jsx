@@ -99,8 +99,8 @@ const AdminDashboard = () => {
     totalCities: [...new Set(cars.map(car => car.city))].length,
     totalBrands: [...new Set(cars.map(car => car.make))].length,
     rentedCars: cars.filter(car => car.availableStatus === false).length,
-    totalUsers: users.length, // This would typically come from another API endpoint
-    totalAgents: users.filter(user => user.role === "Agent").length, // This would typically come from another API endpoint
+    totalUsers: users.length, 
+    totalAgents: users.filter(user => user.roleType === "Agent").length, 
   };
 
   const handleInputChange = (e) => {
