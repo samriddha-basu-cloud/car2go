@@ -69,6 +69,15 @@ const LandingPage = () => {
       <div className="mt-14 relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Section */}
         <div className="text-center mb-16">
+          {/* Added Hero Image */}
+          <div className="mb-8 mx-auto max-w-4xl">
+            <img 
+              src="https://images.unsplash.com/photo-1539788816080-8bdd722d8c22?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+              alt="Car Rental Experience" 
+              className="w-full h-[400px] object-cover rounded-3xl shadow-2xl"
+            />
+          </div>
+          
           <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 mb-4 animate-gradient-text">
             Welcome to Car2Go
           </h1>
@@ -86,12 +95,35 @@ const LandingPage = () => {
 
         {/* About Us Section */}
         <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-10 mb-16 border border-gray-100 dark:border-gray-700">
-          <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-4 text-center">
-            About Us
+          <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-6 text-center">
+            About Car2Go
           </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 text-center max-w-4xl mx-auto leading-relaxed">
-            At Car Rental, we aim to provide the best car rental experience for our customers. With a wide range of vehicles, exceptional service, and competitive pricing, we're your go-to solution for all your car rental needs.
-          </p>
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div>
+              <p className="text-lg text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
+                Car2Go is more than just a car rental service – we're your travel companion, dedicated to transforming your journey into an unforgettable experience. Founded with a passion for mobility and customer satisfaction, we offer a seamless, innovative approach to car rentals.
+              </p>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <ShieldCheck className="text-green-500 w-6 h-6" />
+                  <span className="text-gray-700 dark:text-gray-300">Comprehensive Vehicle Inspection</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <MapPin className="text-blue-500 w-6 h-6" />
+                  <span className="text-gray-700 dark:text-gray-300">Wide Range of Locations</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Globe className="text-indigo-500 w-6 h-6" />
+                  <span className="text-gray-700 dark:text-gray-300">Nationwide and International Coverage</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+                Our mission is to provide hassle-free, reliable, and affordable transportation solutions. Whether you're planning a weekend getaway, a business trip, or need a temporary vehicle, we've got you covered. With a diverse fleet of well-maintained vehicles, transparent pricing, and exceptional customer support, we ensure your travel experience is smooth, comfortable, and enjoyable.
+              </p>
+            </div>
+          </div>
         </div>
 
        {/* Reviews Section */}
