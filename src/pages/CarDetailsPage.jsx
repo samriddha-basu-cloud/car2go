@@ -34,7 +34,7 @@ const CarDetailsPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-black p-4 md:p-8">
-      <div className="max-w-6xl mx-auto bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden">
+      <div className="mt-14 max-w-6xl mx-auto bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
           <Link 
