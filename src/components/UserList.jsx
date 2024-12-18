@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, 
   Mail, 
@@ -7,45 +7,41 @@ import {
   Edit2, 
   Trash2 
 } from 'lucide-react';
+import axios from 'axios';
 
 const UserList = () => {
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      name: "Mridul Mohanta",
-      email: "mridulmohanta@example.com",
-      phone: "+91 9876543210",
-      city: "Indore",
-      state: "Madhya Pradesh",
-      status: "Active",
-      totalBookings: 5,
-      profileImage: "https://via.placeholder.com/150"
-    },
-    {
-      id: 2,
-      name: "John Doe",
-      email: "john.doe@example.com",
-      phone: "+91 8765432109",
-      city: "Mumbai",
-      state: "Maharashtra",
-      status: "Inactive",
-      totalBookings: 2,
-      profileImage: "https://via.placeholder.com/150"
-    },
-    {
-      id: 3,
-      name: "Jane Smith",
-      email: "jane.smith@example.com",
-      phone: "+91 7654321098",
-      city: "Delhi",
-      state: "Delhi",
-      status: "Active",
-      totalBookings: 7,
-      profileImage: "https://via.placeholder.com/150"
-    }
-  ]);
-
+  const [users, setUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        // Get token from local storage
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          throw new Error('No authorization token found');
+        }
+
+        const response = await axios.get('https://localhost:7273/api/User/get-all-users', {
+          headers: {
+            'accept': 'text/plain',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        setUsers(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   const filteredUsers = users.filter((user) =>
     Object.values(user)
@@ -54,24 +50,43 @@ const UserList = () => {
       )
   );
 
-  const getStatusStyles = (status) => {
-    switch (status) {
-      case 'Active':
+  const getRoleStyles = (roleTypes) => {
+    const role = roleTypes[0]; // Assuming first role is primary
+    switch (role) {
+      case 'Admin':
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
+      case 'User':
         return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-      case 'Inactive':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+      case 'Agent':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
     }
   };
 
-  const handleEditUser = (userId) => {
-    alert(`Edit User: ${userId}`);
+  const handleEditUser = (userEmail) => {
+    alert(`Edit User: ${userEmail}`);
   };
 
-  const handleDeleteUser = (userId) => {
-    alert(`Delete User: ${userId}`);
+  const handleDeleteUser = (userEmail) => {
+    alert(`Delete User: ${userEmail}`);
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        {error}
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-8">
@@ -91,7 +106,7 @@ const UserList = () => {
       <div className="mb-6">
         <input
           type="text"
-          placeholder="Search users by name, email, phone, city, or state..."
+          placeholder="Search users by name, email, phone..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
@@ -102,29 +117,26 @@ const UserList = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredUsers.map((user) => (
           <div 
-            key={user.id} 
+            key={user.email} 
             className="bg-gray-50 dark:bg-gray-700 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden"
           >
             <div className="relative p-6">
-              {/* Status Badge */}
-              <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-semibold ${getStatusStyles(user.status)}`}>
-                {user.status}
+              {/* Role Badge */}
+              <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-semibold ${getRoleStyles(user.roleType)}`}>
+                {user.roleType[0]}
               </div>
 
               {/* User Profile */}
               <div className="flex items-center mb-4">
-                <img 
-                  src={user.profileImage} 
-                  alt={user.name} 
-                  className="w-16 h-16 rounded-full mr-4 object-cover border-4 border-white dark:border-gray-600"
-                />
+                <div className="w-16 h-16 rounded-full mr-4 bg-blue-200 flex items-center justify-center">
+                  <span className="text-2xl font-bold text-blue-800">
+                    {user.firstName[0]}{user.lastName[0]}
+                  </span>
+                </div>
                 <div>
                   <h3 className="text-xl font-bold text-gray-800 dark:text-white">
-                    {user.name}
+                    {user.firstName} {user.lastName}
                   </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {user.totalBookings} Bookings
-                  </p>
                 </div>
               </div>
 
@@ -136,24 +148,20 @@ const UserList = () => {
                 </div>
                 <div className="flex items-center">
                   <Phone className="mr-3 text-green-500 w-5 h-5" />
-                  <span>{user.phone}</span>
-                </div>
-                <div className="flex items-center">
-                  <MapPin className="mr-3 text-red-500 w-5 h-5" />
-                  <span>{user.city}, {user.state}</span>
+                  <span>{user.phoneNumber}</span>
                 </div>
               </div>
 
               {/* Action Buttons */}
               <div className="flex space-x-3">
                 <button
-                  onClick={() => handleEditUser(user.id)}
+                  onClick={() => handleEditUser(user.email)}
                   className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center justify-center transition-colors"
                 >
                   <Edit2 className="mr-2 w-5 h-5" /> Edit
                 </button>
                 <button
-                  onClick={() => handleDeleteUser(user.id)}
+                  onClick={() => handleDeleteUser(user.email)}
                   className="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center justify-center transition-colors"
                 >
                   <Trash2 className="mr-2 w-5 h-5" /> Delete
