@@ -15,12 +15,36 @@ import {
   LocateIcon, 
   FlagIcon 
 } from 'lucide-react';
-import { toast } from 'sonner'; // Assuming you're using sonner for toast notifications
+import { toast } from 'sonner';
 
 const CarDetailsPage = () => {
   const location = useLocation();
   const { carDetails } = location.state || {};
   const [isReserving, setIsReserving] = useState(false);
+  const [dropOffDate, setDropOffDate] = useState('');
+  const [totalPrice, setTotalPrice] = useState(0);
+
+  // Calculate days between two dates
+  const calculateDaysBetween = (startDate, endDate) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const timeDiff = Math.abs(end.getTime() - start.getTime());
+    const dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    return dayDiff;
+  };
+
+  // Handle drop-off date change
+  const handleDropOffDateChange = (e) => {
+    const selectedDropOffDate = e.target.value;
+    setDropOffDate(selectedDropOffDate);
+
+    // Calculate total days and price
+    if (carDetails.availableDate && selectedDropOffDate) {
+      const days = calculateDaysBetween(carDetails.availableDate, selectedDropOffDate);
+      const price = days * carDetails.pricePerDay;
+      setTotalPrice(price);
+    }
+  };
 
   const handleReserveCar = async () => {
     // Get details from local storage
@@ -33,15 +57,16 @@ const CarDetailsPage = () => {
       return;
     }
 
-    // Validate car details
+    // Validate car details and dates
     if (!carDetails || !carDetails.licensePlate) {
       toast.error('Car details are missing');
       return;
     }
 
-    // Set reservation dates (you might want to make these dynamic or use a date picker)
-    const pickUpDate = new Date().toISOString().split('T')[0]; // Today's date
-    const dropOffDate = new Date(new Date().setDate(new Date().getDate() + 2)).toISOString().split('T')[0]; // Two days from now
+    if (!dropOffDate) {
+      toast.error('Please select a drop-off date');
+      return;
+    }
 
     try {
       setIsReserving(true);
@@ -55,7 +80,7 @@ const CarDetailsPage = () => {
         body: JSON.stringify({
           email,
           licensePlate: carDetails.licensePlate,
-          pickUpDate,
+          pickUpDate: carDetails.availableDate,
           dropOffDate
         })
       });
@@ -86,6 +111,9 @@ const CarDetailsPage = () => {
       </div>
     );
   }
+
+  // Minimum drop-off date is the available date
+  const minDropOffDate = carDetails.availableDate;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-black p-4 md:p-8">
@@ -236,6 +264,81 @@ const CarDetailsPage = () => {
             <p className="text-gray-700 dark:text-gray-200 leading-relaxed bg-white/50 dark:bg-gray-800/50 p-4 rounded-2xl">
               {carDetails.description}
             </p>
+          </div>
+        )}
+
+
+       {/* Reservation Section */}
+        {carDetails.availableStatus && (
+          <div className="p-8 bg-gray-100 dark:bg-gray-700/50 backdrop-blur-sm">
+            <h3 className="text-2xl font-bold mb-4 flex items-center text-blue-800 dark:text-blue-300">
+              <CalendarIcon className="w-6 h-6 mr-3" />
+              Reservation Details
+            </h3>
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Pickup Date */}
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 mb-2">
+                  Pickup Date
+                </label>
+                <input 
+                  type="date" 
+                  value={carDetails.availableDate}
+                  disabled
+                  className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg cursor-not-allowed"
+                />
+              </div>
+
+              {/* Drop-off Date */}
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 mb-2">
+                  Drop-off Date
+                </label>
+                <input 
+                  type="date" 
+                  value={dropOffDate}
+                  min={minDropOffDate}
+                  onChange={handleDropOffDateChange}
+                  className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg"
+                />
+              </div>
+
+              {/* Price Calculation */}
+              {dropOffDate && (
+                <div className="md:col-span-2 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-700 dark:text-gray-300">
+                      Days Booked: {calculateDaysBetween(carDetails.availableDate, dropOffDate)}
+                    </span>
+                    <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                      Total Price: ₹{totalPrice}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Reserve Car Button */}
+            {dropOffDate && (
+              <div className="mt-6">
+                <button
+                  onClick={handleReserveCar}
+                  disabled={isReserving}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl 
+                    transition duration-300 ease-in-out transform hover:scale-105 
+                    disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                >
+                  {isReserving ? (
+                    <>
+                      <span className="animate-spin mr-2">⏳</span>
+                      Reserving...
+                    </>
+                  ) : (
+                    `Reserve Car - ₹${totalPrice}`
+                  )}
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
