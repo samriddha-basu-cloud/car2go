@@ -39,7 +39,7 @@ const CarList = ({ cars, onEditCar, onDeleteCar }) => {
           <div className="relative">
             <img
               src={car.imageUrl}
-              alt={`${car.carMake} ${car.carModel}`}
+              alt={`${car.make} ${car.carModel}`}
               className="w-full h-56 object-cover transition-transform duration-300 hover:scale-105"
             />
             <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-semibold ${getStatusStyles(car.reservationStatus)}`}>
@@ -52,15 +52,15 @@ const CarList = ({ cars, onEditCar, onDeleteCar }) => {
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h3 className="text-2xl font-bold text-gray-800 dark:text-white">
-                  {car.carMake} {car.carModel}
+                  {car.make} {car.carModel}
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {car.modelYear} Model
+                  {car.model} Model
                 </p>
               </div>
               <div className="text-gray-500 dark:text-gray-400">
                 <p className="text-sm">Car Number</p>
-                <strong>{car.carNumber}</strong>
+                <strong>{car.licensePlate}</strong>
               </div>
             </div>
 
@@ -80,15 +80,11 @@ const CarList = ({ cars, onEditCar, onDeleteCar }) => {
               </div>
               <div className="flex items-center">
                 <DollarSign className="mr-2 text-green-500 w-5 h-5" />
-                <span>₹{car.totalAmount}</span>
+                <span>₹{car.pricePerDay}</span>
               </div>
               <div className="flex items-center">
                 <CalendarIcon className="mr-2 text-indigo-500 w-5 h-5" />
                 <span>Pickup: {car.pickUpDate}</span>
-              </div>
-              <div className="flex items-center">
-                <CalendarIcon className="mr-2 text-indigo-500 w-5 h-5" />
-                <span>Drop: {car.dropOffDate}</span>
               </div>
             </div>
 
