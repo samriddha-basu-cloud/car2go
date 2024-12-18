@@ -81,7 +81,7 @@ const AdminDashboard = () => {
     totalCars: cars.length,
     totalCities: [...new Set(cars.map(car => car.city))].length,
     totalBrands: [...new Set(cars.map(car => car.carMake))].length,
-    rentedCars: cars.filter(car => car.reservationStatus === 'Confirmed').length,
+    rentedCars: cars.filter(car => car.reservationStatus === 'true').length,
     totalUsers: 3, // This would typically come from another API endpoint
     totalAgents: 15 // This would typically come from another API endpoint
   };
