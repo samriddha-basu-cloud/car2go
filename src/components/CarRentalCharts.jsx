@@ -9,11 +9,12 @@ const CarRentalCharts = () => {
   const [chartType1, setChartType1] = useState('bar');
   const [chartType2, setChartType2] = useState('pie');
   const [carData, setCarData] = useState([]);
+  const [userData, setUserData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchCarData = async () => {
+    const fetchData = async () => {
       try {
         // Retrieve the token from local storage
         const token = localStorage.getItem('token');
@@ -22,7 +23,8 @@ const CarRentalCharts = () => {
           throw new Error('No authentication token found');
         }
 
-        const response = await fetch('https://localhost:7273/api/Car/get-all-cars', {
+        // Fetch cars
+        const carsResponse = await fetch('https://localhost:7273/api/Car/get-all-cars', {
           method: 'GET',
           headers: {
             'accept': 'text/plain',
@@ -30,26 +32,41 @@ const CarRentalCharts = () => {
           }
         });
 
-        if (!response.ok) {
+        // Fetch users
+        const usersResponse = await fetch('https://localhost:7273/api/User/get-all-users', {
+          method: 'GET',
+          headers: {
+            'accept': 'text/plain',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!carsResponse.ok) {
           throw new Error('Failed to fetch cars');
         }
 
-        const cars = await response.json();
+        if (!usersResponse.ok) {
+          throw new Error('Failed to fetch users');
+        }
+
+        const cars = await carsResponse.json();
+        const users = await usersResponse.json();
 
         // Process car data for charts
         const rentalStatusData = processCarRentalStatus(cars);
-        const userRentalData = processUserRentalActivity(cars);
+        const userRentalData = processUserRentalActivity(cars, users);
 
         setCarData(rentalStatusData);
+        setUserData(userRentalData);
         setIsLoading(false);
       } catch (err) {
-        console.error('Error fetching car data:', err);
+        console.error('Error fetching data:', err);
         setError(err.message);
         setIsLoading(false);
       }
     };
 
-    fetchCarData();
+    fetchData();
   }, []);
 
   // Process car data to get rental status
@@ -64,15 +81,20 @@ const CarRentalCharts = () => {
     ];
   };
 
-  // Process user rental activity (simplified)
-  const processUserRentalActivity = (cars) => {
-    const uniqueUsers = new Set(cars.map(car => car.userEmail)).size;
-    const activeUsers = cars.filter(car => car.availableStatus === false).length;
-    const inactiveUsers = uniqueUsers - activeUsers;
+  // Process user rental activity 
+  const processUserRentalActivity = (cars, users) => {
+    const totalUsers = users.length;
+    // const activeUserEmails = new Set(
+    //   cars
+    //     .filter(car => car.reservationStatus === 'Confirmed')
+    //     .map(car => car.userEmail)
+    // );
+    const activeUsers = cars.filter(car => car.availableStatus === false).length;;
+    const inactiveUsers = totalUsers - activeUsers;
 
     return [
-      { name: 'Active Users', value: activeUsers, total: uniqueUsers },
-      { name: 'Inactive Users', value: inactiveUsers, total: uniqueUsers }
+      { name: 'Active Users', value: activeUsers, total: totalUsers },
+      { name: 'Inactive Users', value: inactiveUsers, total: totalUsers }
     ];
   };
 
@@ -242,7 +264,7 @@ const CarRentalCharts = () => {
   return (
     <div className="grid md:grid-cols-2 gap-6">
       {renderChart(carData, 'Car Rental Status', chartType1, setChartType1)}
-      {renderChart(carData, 'User Rental Activity', chartType2, setChartType2)}
+      {renderChart(userData, 'User Rental Activity', chartType2, setChartType2)}
     </div>
   );
 };
