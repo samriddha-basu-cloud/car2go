@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { 
   ChevronLeft, 
@@ -15,10 +15,65 @@ import {
   LocateIcon, 
   FlagIcon 
 } from 'lucide-react';
+import { toast } from 'sonner'; // Assuming you're using sonner for toast notifications
 
 const CarDetailsPage = () => {
   const location = useLocation();
   const { carDetails } = location.state || {};
+  const [isReserving, setIsReserving] = useState(false);
+
+  const handleReserveCar = async () => {
+    // Get details from local storage
+    const email = localStorage.getItem('email');
+    const token = localStorage.getItem('token');
+
+    // Validate local storage items
+    if (!email || !token) {
+      toast.error('Please log in to reserve a car');
+      return;
+    }
+
+    // Validate car details
+    if (!carDetails || !carDetails.licensePlate) {
+      toast.error('Car details are missing');
+      return;
+    }
+
+    // Set reservation dates (you might want to make these dynamic or use a date picker)
+    const pickUpDate = new Date().toISOString().split('T')[0]; // Today's date
+    const dropOffDate = new Date(new Date().setDate(new Date().getDate() + 2)).toISOString().split('T')[0]; // Two days from now
+
+    try {
+      setIsReserving(true);
+      const response = await fetch('https://localhost:7273/api/Reservation/reserve-car', {
+        method: 'POST',
+        headers: {
+          'accept': '*/*',
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email,
+          licensePlate: carDetails.licensePlate,
+          pickUpDate,
+          dropOffDate
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(errorData || 'Failed to reserve car');
+      }
+
+      const result = await response.json();
+      toast.success('Car reserved successfully!');
+    } catch (error) {
+      console.error('Reservation error:', error);
+      toast.error(error.message || 'An error occurred while reserving the car');
+    } finally {
+      setIsReserving(false);
+    }
+  };
 
   if (!carDetails) {
     return (
@@ -38,7 +93,7 @@ const CarDetailsPage = () => {
         {/* Header */}
         <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
           <Link 
-            to="/" 
+            to="/dashboard" 
             className="flex items-center mb-4 hover:text-gray-200 transition-all duration-300 ease-in-out transform hover:-translate-x-1"
           >
             <ChevronLeft className="w-5 h-5 mr-2" /> 
@@ -146,6 +201,28 @@ const CarDetailsPage = () => {
                 ))}
               </div>
             </div>
+
+            {/* Reserve Car Button */}
+            {carDetails.availableStatus && (
+              <div className="mt-6">
+                <button
+                  onClick={handleReserveCar}
+                  disabled={isReserving}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl 
+                    transition duration-300 ease-in-out transform hover:scale-105 
+                    disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                >
+                  {isReserving ? (
+                    <>
+                      <span className="animate-spin mr-2">⏳</span>
+                      Reserving...
+                    </>
+                  ) : (
+                    'Reserve Car'
+                  )}
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
