@@ -197,12 +197,12 @@ const AgentDashboard = () => {
           /> */}
         </div>
 
-        <div className="mb-8">
+        {/* <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
             Rental Analytics
           </h2>
           <CarRentalCharts />
-        </div>
+        </div> */}
 
         {/* Search and Add Car Section */}
         <div className="mb-8">
@@ -227,9 +227,9 @@ const AgentDashboard = () => {
         </div>
 
         {/* User List Section */}
-        <div className="mb-8 mt-14">
+        {/* <div className="mb-8 mt-14">
           <UserList />
-        </div>
+        </div> */}
 
         {/* Reviews Section */}
         <div className="bg-white dark:bg-gray-700 rounded-xl shadow-md p-6 mt-14">
