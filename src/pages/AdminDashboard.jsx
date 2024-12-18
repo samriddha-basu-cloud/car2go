@@ -32,6 +32,7 @@ const DashboardCard = ({ icon: Icon, title, value, className }) => (
 const AdminDashboard = () => {
   const [cars, setCars] = useState([]);
   const [users, setUsers] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
@@ -60,6 +61,15 @@ const AdminDashboard = () => {
           }
         });
 
+        // Fetch reviews
+        const reviewResponse = await fetch('https://localhost:7273/api/User/get-all-Reviews', {
+          method: 'GET',
+          headers: {
+            'accept': 'text/plain',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
         // Fetch users
         const usersResponse = await fetch('https://localhost:7273/api/User/get-all-users', {
           method: 'GET',
@@ -77,8 +87,15 @@ const AdminDashboard = () => {
           throw new Error('Failed to fetch users');
         }
 
+        if (!reviewResponse.ok) {
+          throw new Error('Failed to fetch reviews');
+        }
+
         const users = await usersResponse.json();
         setUsers(users);
+
+        const reviews = await reviewResponse.json();
+        setReviews(reviews);
 
         const data = await response.json();
         setCars(data);
@@ -220,7 +237,7 @@ const AdminDashboard = () => {
             <Star className="mr-2 text-yellow-500" /> Recent Reviews
           </h2>
           <div className="grid md:grid-cols-3 gap-4">
-            {[1, 2, 3].map((review, index) => (
+            {reviews.map((review, index) => (
               <div 
                 key={index} 
                 className="bg-gray-50 dark:bg-gray-600 p-4 rounded-lg"
@@ -237,14 +254,14 @@ const AdminDashboard = () => {
                       {[...Array(5)].map((_, i) => (
                         <Star 
                           key={i} 
-                          className={`w-4 h-4 ${i < 4 ? 'fill-current' : 'text-gray-300'}`} 
+                          className={`w-4 h-4 ${i < review.rating ? 'fill-current' : 'text-gray-300'}`} 
                         />
                       ))}
                     </div>
                   </div>
                 </div>
                 <p className="text-gray-600 dark:text-gray-300">
-                  Great service and smooth booking experience!
+                  {review.reviewText}
                 </p>
               </div>
             ))}
