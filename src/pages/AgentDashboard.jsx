@@ -31,7 +31,7 @@ const DashboardCard = ({ icon: Icon, title, value, className }) => (
 
 const AgentDashboard = () => {
   const [cars, setCars] = useState([]);
-  const [users, setUsers] = useState([]);
+  // const [users, setUsers] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -71,28 +71,28 @@ const AgentDashboard = () => {
         });
 
         // Fetch users
-        const usersResponse = await fetch('https://localhost:7273/api/User/get-all-users', {
-          method: 'GET',
-          headers: {
-            'accept': 'text/plain',
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        // const usersResponse = await fetch('https://localhost:7273/api/User/get-all-users', {
+        //   method: 'GET',
+        //   headers: {
+        //     'accept': 'text/plain',
+        //     'Authorization': `Bearer ${token}`
+        //   }
+        // });
 
         if (!response.ok) {
           throw new Error('Failed to fetch cars');
         }
 
-         if (!usersResponse.ok) {
-          throw new Error('Failed to fetch users');
-        }
+        //  if (!usersResponse.ok) {
+        //   throw new Error('Failed to fetch users');
+        // }
 
         if (!reviewResponse.ok) {
           throw new Error('Failed to fetch reviews');
         }
 
-        const users = await usersResponse.json();
-        setUsers(users);
+        // const users = await usersResponse.json();
+        // setUsers(users);
 
         const reviews = await reviewResponse.json();
         setReviews(reviews);
@@ -116,8 +116,8 @@ const AgentDashboard = () => {
     totalCities: [...new Set(cars.map(car => car.city))].length,
     totalBrands: [...new Set(cars.map(car => car.make))].length,
     rentedCars: cars.filter(car => car.availableStatus === false).length,
-    totalUsers: users.length,
-    totalAgents: users.filter(user => user.roleType.includes("Agent")).length,
+    // totalUsers: users.length,
+    // totalAgents: users.filter(user => user.roleType.includes("Agent")).length,
   };
 
   const handleInputChange = (e) => {
@@ -164,7 +164,7 @@ const AgentDashboard = () => {
         </div>
 
         {/* Statistics Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 mb-8">
           <DashboardCard 
             icon={Car} 
             title="Total Cars" 
@@ -185,11 +185,11 @@ const AgentDashboard = () => {
             title="Rented Cars" 
             value={dashboardStats.rentedCars} 
           />
-          <DashboardCard 
+          {/* <DashboardCard 
             icon={Users} 
             title="Total Users" 
             value={dashboardStats.totalUsers} 
-          />
+          /> */}
           {/* <DashboardCard 
             icon={UserPlus} 
             title="Total Agents" 
