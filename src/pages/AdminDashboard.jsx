@@ -31,6 +31,7 @@ const DashboardCard = ({ icon: Icon, title, value, className }) => (
 
 const AdminDashboard = () => {
   const [cars, setCars] = useState([]);
+  const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
@@ -59,9 +60,25 @@ const AdminDashboard = () => {
           }
         });
 
+        // Fetch users
+        const usersResponse = await fetch('https://localhost:7273/api/User/get-all-users', {
+          method: 'GET',
+          headers: {
+            'accept': 'text/plain',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
         if (!response.ok) {
           throw new Error('Failed to fetch cars');
         }
+
+         if (!usersResponse.ok) {
+          throw new Error('Failed to fetch users');
+        }
+
+        const users = await usersResponse.json();
+        setUsers(users);
 
         const data = await response.json();
         setCars(data);
@@ -82,8 +99,8 @@ const AdminDashboard = () => {
     totalCities: [...new Set(cars.map(car => car.city))].length,
     totalBrands: [...new Set(cars.map(car => car.make))].length,
     rentedCars: cars.filter(car => car.availableStatus === false).length,
-    totalUsers: 3, // This would typically come from another API endpoint
-    totalAgents: 15 // This would typically come from another API endpoint
+    totalUsers: users.length, // This would typically come from another API endpoint
+    totalAgents: users.filter(user => user.role === "Admin").length, // This would typically come from another API endpoint
   };
 
   const handleInputChange = (e) => {
