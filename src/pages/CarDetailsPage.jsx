@@ -17,12 +17,71 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
+const ReservationConfirmationModal = ({ 
+  isOpen, 
+  onClose, 
+  onConfirm, 
+  carDetails, 
+  dropOffDate, 
+  totalPrice 
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-md w-full">
+        <h2 className="text-2xl font-bold mb-4 text-blue-800 dark:text-blue-300">
+          Confirm Reservation
+        </h2>
+        <div className="space-y-4 mb-6">
+          <div className="flex justify-between">
+            <span className="text-gray-600 dark:text-gray-300">Car</span>
+            <span className="font-semibold">{carDetails.make} {carDetails.model}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-600 dark:text-gray-300">License Plate</span>
+            <span className="font-semibold">{carDetails.licensePlate}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-600 dark:text-gray-300">Pickup Date</span>
+            <span className="font-semibold">{carDetails.availableDate}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-600 dark:text-gray-300">Drop-off Date</span>
+            <span className="font-semibold">{dropOffDate}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-600 dark:text-gray-300">Total Price</span>
+            <span className="font-bold text-green-600">₹{totalPrice}</span>
+          </div>
+        </div>
+        <div className="flex space-x-4">
+          <button
+            onClick={onClose}
+            className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 py-3 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="flex-1 bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition"
+          >
+            Confirm Reservation
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const CarDetailsPage = () => {
   const location = useLocation();
   const { carDetails } = location.state || {};
   const [isReserving, setIsReserving] = useState(false);
   const [dropOffDate, setDropOffDate] = useState('');
   const [totalPrice, setTotalPrice] = useState(0);
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+  const [reservationStatus, setReservationStatus] = useState(null);
 
   // Calculate days between two dates
   const calculateDaysBetween = (startDate, endDate) => {
@@ -37,6 +96,7 @@ const CarDetailsPage = () => {
   const handleDropOffDateChange = (e) => {
     const selectedDropOffDate = e.target.value;
     setDropOffDate(selectedDropOffDate);
+    setReservationStatus(null);
 
     // Calculate total days and price
     if (carDetails.availableDate && selectedDropOffDate) {
@@ -46,7 +106,18 @@ const CarDetailsPage = () => {
     }
   };
 
+  const openConfirmationModal = () => {
+    setIsConfirmationOpen(true);
+  };
+
+  const closeConfirmationModal = () => {
+    setIsConfirmationOpen(false);
+  };
+
   const handleReserveCar = async () => {
+    // Close confirmation modal
+    setIsConfirmationOpen(false);
+
     // Get details from local storage
     const email = localStorage.getItem('email');
     const token = localStorage.getItem('token');
@@ -87,13 +158,16 @@ const CarDetailsPage = () => {
 
       if (!response.ok) {
         const errorData = await response.text();
+        setReservationStatus('failed');
         throw new Error(errorData || 'Failed to reserve car');
       }
 
       const result = await response.json();
+      setReservationStatus('success');
       toast.success('Car reserved successfully!');
     } catch (error) {
       console.error('Reservation error:', error);
+      setReservationStatus('failed');
       toast.error(error.message || 'An error occurred while reserving the car');
     } finally {
       setIsReserving(false);
@@ -114,6 +188,7 @@ const CarDetailsPage = () => {
 
   // Minimum drop-off date is the available date
   const minDropOffDate = carDetails.availableDate;
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-black p-4 md:p-8">
@@ -231,7 +306,7 @@ const CarDetailsPage = () => {
             </div>
 
             {/* Reserve Car Button */}
-            {carDetails.availableStatus && (
+            {/* {carDetails.availableStatus && (
               <div className="mt-6">
                 <button
                   onClick={handleReserveCar}
@@ -250,9 +325,8 @@ const CarDetailsPage = () => {
                   )}
                 </button>
               </div>
-            )}
-          </div>
-        </div>
+            )} */}
+          
 
         {/* Description */}
         {carDetails.description && (
@@ -318,30 +392,54 @@ const CarDetailsPage = () => {
               )}
             </div>
 
+            {/* Reservation Status */}
+            {reservationStatus === 'success' && (
+              <div className="mt-4 p-4 bg-green-100 dark:bg-green-900 rounded-lg flex items-center">
+                <CheckCircle2 className="w-6 h-6 text-green-600 mr-3" />
+                <span className="text-green-800 dark:text-green-200">
+                  Car Reserved Successfully! Check your email for details.
+                </span>
+              </div>
+            )}
+
+            {reservationStatus === 'failed' && (
+              <div className="mt-4 p-4 bg-red-100 dark:bg-red-900 rounded-lg flex items-center">
+                <XCircle className="w-6 h-6 text-red-600 mr-3" />
+                <span className="text-red-800 dark:text-red-200">
+                  Reservation Failed. Please try again later.
+                </span>
+              </div>
+            )}
+
             {/* Reserve Car Button */}
             {dropOffDate && (
               <div className="mt-6">
                 <button
-                  onClick={handleReserveCar}
+                  onClick={openConfirmationModal}
                   disabled={isReserving}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl 
                     transition duration-300 ease-in-out transform hover:scale-105 
                     disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                 >
-                  {isReserving ? (
-                    <>
-                      <span className="animate-spin mr-2">⏳</span>
-                      Reserving...
-                    </>
-                  ) : (
-                    `Reserve Car - ₹${totalPrice}`
-                  )}
+                  Reserve Car - ₹{totalPrice}
                 </button>
               </div>
             )}
           </div>
         )}
+
+        {/* Confirmation Modal */}
+        <ReservationConfirmationModal
+          isOpen={isConfirmationOpen}
+          onClose={closeConfirmationModal}
+          onConfirm={handleReserveCar}
+          carDetails={carDetails}
+          dropOffDate={dropOffDate}
+          totalPrice={totalPrice}
+        />
       </div>
+    </div>
+    </div>
     </div>
   );
 };
