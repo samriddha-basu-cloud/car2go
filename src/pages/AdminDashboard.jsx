@@ -16,6 +16,7 @@ import CarList from '../components/CarList';
 import AddCarButton from '../components/AddCarButton';
 import UserList from '../components/UserList';
 import CarRentalCharts from '../components/CarRentalCharts';
+import ReservationsList from '../components/ReservationsList';
 
 const DashboardCard = ({ icon: Icon, title, value, className }) => (
   <div className={`bg-white dark:bg-gray-700 p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 ${className}`}>
@@ -62,7 +63,7 @@ const AdminDashboard = () => {
         });
 
         // Fetch reviews
-        const reviewResponse = await fetch('https://localhost:7273/api/User/get-all-Reviews', {
+        const reviewResponse = await fetch('https://localhost:7273/api/Review/get-all-Reviews', {
           method: 'GET',
           headers: {
             'accept': 'text/plain',
@@ -229,6 +230,11 @@ const AdminDashboard = () => {
         {/* User List Section */}
         <div className="mb-8 mt-14">
           <UserList />
+        </div>
+
+        {/* Reservations List Section */}
+        <div className="mb-8 mt-14">
+          <ReservationsList />
         </div>
 
         {/* Reviews Section */}
