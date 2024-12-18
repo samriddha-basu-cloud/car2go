@@ -84,7 +84,7 @@ const CarList = ({ cars, onEditCar, onDeleteCar }) => {
               </div>
               <div className="flex items-center">
                 <CalendarIcon className="mr-2 text-indigo-500 w-5 h-5" />
-                <span>Pickup: {car.availableDate}</span>
+                <span>Available from: {car.availableDate}</span>
               </div>
             </div>
 
