@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Car, 
   Users, 
@@ -30,67 +30,9 @@ const DashboardCard = ({ icon: Icon, title, value, className }) => (
 );
 
 const AdminDashboard = () => {
-  const [cars, setCars] = useState([
-    {
-      reservationStatus: "Confirmed",
-      pickUpDate: "2024-12-18",
-      dropOffDate: "2024-12-19",
-      userEmail: "mridulmohanta@example.com",
-      carMake: "Honda",
-      carModel: "City",
-      carNumber: "MP09CP7235",
-      colour: "White",
-      modelYear: 2020,
-      totalSeats: 5,
-      totalAmount: 3000,
-      imageUrl: "http://res.cloudinary.com/dhnatfkvb/image/upload/v1732706410/da229famd8vwpbc09lq9.jpg",
-      city: "Indore",
-      address: "711,Honda Showroom",
-      state: "Madhya Pradesh",
-      country: "India",
-      zipCode: "452014"
-    },
-    {
-      reservationStatus: "Pending",
-      pickUpDate: "2024-12-20",
-      dropOffDate: "2024-12-21",
-      userEmail: "john@example.com",
-      carMake: "Toyota",
-      carModel: "Corolla",
-      carNumber: "MH12AB1234",
-      colour: "Blue",
-      modelYear: 2019,
-      totalSeats: 4,
-      totalAmount: 3500,
-      imageUrl: "https://via.placeholder.com/300",
-      city: "Mumbai",
-      address: "Toyota Plaza, Main Street",
-      state: "Maharashtra",
-      country: "India",
-      zipCode: "400001"
-    },
-    {
-      reservationStatus: "Cancelled",
-      pickUpDate: "2024-12-22",
-      dropOffDate: "2024-12-23",
-      userEmail: "jane@example.com",
-      carMake: "Maruti",
-      carModel: "Swift",
-      carNumber: "DL10XYZ9876",
-      colour: "Red",
-      modelYear: 2021,
-      totalSeats: 5,
-      totalAmount: 2500,
-      imageUrl: "https://via.placeholder.com/300",
-      city: "Delhi",
-      address: "Maruti Showroom, Ring Road",
-      state: "Delhi",
-      country: "India",
-      zipCode: "110001"
-    }
-    // Add other mock cars here
-  ]);
-
+  const [cars, setCars] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
     make: '',
     model: '',
@@ -99,14 +41,49 @@ const AdminDashboard = () => {
     state: ''
   });
 
-  // Dashboard statistics
+  useEffect(() => {
+    const fetchCars = async () => {
+      try {
+        // Retrieve the token from local storage
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
+
+        const response = await fetch('https://localhost:7273/api/Car/get-all-cars', {
+          method: 'GET',
+          headers: {
+            'accept': 'text/plain',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch cars');
+        }
+
+        const data = await response.json();
+        setCars(data);
+        setIsLoading(false);
+      } catch (err) {
+        console.error('Error fetching cars:', err);
+        setError(err.message);
+        setIsLoading(false);
+      }
+    };
+
+    fetchCars();
+  }, []);
+
+  // Dashboard statistics calculation
   const dashboardStats = {
     totalCars: cars.length,
     totalCities: [...new Set(cars.map(car => car.city))].length,
     totalBrands: [...new Set(cars.map(car => car.carMake))].length,
     rentedCars: cars.filter(car => car.reservationStatus === 'Confirmed').length,
-    totalUsers: 3,
-    totalAgents: 15
+    totalUsers: 3, // This would typically come from another API endpoint
+    totalAgents: 15 // This would typically come from another API endpoint
   };
 
   const handleInputChange = (e) => {
@@ -121,6 +98,22 @@ const AdminDashboard = () => {
   const handleAddCar = () => alert('Redirect to Add Car Page');
   const handleEditCar = (carNumber) => alert(`Edit Car: ${carNumber}`);
   const handleDeleteCar = (carNumber) => alert(`Delete Car: ${carNumber}`);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <p className="text-xl text-gray-600">Loading cars...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <p className="text-xl text-red-600">Error: {error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-8">
@@ -199,7 +192,7 @@ const AdminDashboard = () => {
           />
         </div>
 
-        {/* Car List Section */}
+        {/* User List Section */}
         <div className="mb-8 mt-14">
           <UserList />
         </div>
