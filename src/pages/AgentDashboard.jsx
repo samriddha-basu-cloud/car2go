@@ -243,13 +243,13 @@ const AgentDashboard = () => {
                 className="bg-gray-50 dark:bg-gray-600 p-4 rounded-lg"
               >
                 <div className="flex items-center mb-2">
-                  <img 
+                  {/* <img 
                     src={`/api/placeholder/40/40?text=${index + 1}`} 
                     alt={`User ${index + 1}`} 
                     className="w-10 h-10 rounded-full mr-3" 
-                  />
+                  /> */}
                   <div>
-                    <p className="font-semibold text-gray-800 dark:text-white">User {index + 1}</p>
+                    {/* <p className="font-semibold text-gray-800 dark:text-white">User {index + 1}</p> */}
                     <div className="flex text-yellow-500">
                       {[...Array(5)].map((_, i) => (
                         <Star 
