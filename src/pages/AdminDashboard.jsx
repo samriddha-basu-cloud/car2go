@@ -99,8 +99,8 @@ const AdminDashboard = () => {
     totalCities: [...new Set(cars.map(car => car.city))].length,
     totalBrands: [...new Set(cars.map(car => car.make))].length,
     rentedCars: cars.filter(car => car.availableStatus === false).length,
-    totalUsers: users.length, 
-    totalAgents: users.filter(user => user.roleType === "Agent").length, 
+    totalUsers: users.length,
+    totalAgents: users.filter(user => user.roleType.includes("Agent")).length,
   };
 
   const handleInputChange = (e) => {
