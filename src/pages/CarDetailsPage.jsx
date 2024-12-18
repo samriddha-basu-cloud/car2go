@@ -22,25 +22,33 @@ const CarDetailsPage = () => {
 
   if (!carDetails) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <p className="text-gray-600 dark:text-gray-300">No car details available.</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-black">
+        <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-2xl">
+          <p className="text-gray-600 dark:text-gray-300 text-xl font-semibold">
+            No car details available.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8 mt-14">
-      <div className="max-w-5xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-black p-4 md:p-8">
+      <div className="max-w-6xl mx-auto bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
-          <Link to="/" className="flex items-center mb-4 hover:text-gray-200 transition-colors">
-            <ChevronLeft className="w-5 h-5 mr-2" /> Back to Dashboard
+          <Link 
+            to="/" 
+            className="flex items-center mb-4 hover:text-gray-200 transition-all duration-300 ease-in-out transform hover:-translate-x-1"
+          >
+            <ChevronLeft className="w-5 h-5 mr-2" /> 
+            Back to Dashboard
           </Link>
           <div className="flex items-center justify-between">
-            <h2 className="text-4xl font-extrabold">
+            <h2 className="text-4xl font-extrabold tracking-tight">
               {carDetails.make} {carDetails.model}
             </h2>
-            <div className="bg-white/20 px-4 py-2 rounded-lg">
+            <div className="bg-white/20 px-4 py-2 rounded-lg backdrop-blur-sm">
               <span className="text-xl font-semibold">Year {carDetails.year}</span>
             </div>
           </div>
@@ -49,98 +57,93 @@ const CarDetailsPage = () => {
         {/* Car Image and Details Container */}
         <div className="grid md:grid-cols-2 gap-8 p-8">
           {/* Car Image */}
-          <div className="rounded-2xl overflow-hidden shadow-lg">
+          <div className="relative">
             <div
-              className="h-96 bg-cover bg-center transform transition-transform duration-300 hover:scale-105"
+              className="h-96 bg-cover bg-center rounded-3xl shadow-2xl transform transition-all duration-500 hover:scale-105 hover:shadow-3xl"
               style={{
                 backgroundImage: `url(${carDetails.imageUrl || '/default-car-image.jpg'})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
               }}
-            ></div>
+            >
+              <div className="absolute inset-0 bg-black/10 rounded-3xl hover:bg-black/20 transition-all duration-300"></div>
+            </div>
           </div>
 
           {/* Detailed Information */}
           <div className="space-y-6">
-            <div className="bg-gray-100 dark:bg-gray-700 p-6 rounded-2xl shadow-md">
-              <h3 className="text-2xl font-bold mb-4 flex items-center">
-                <InfoIcon className="w-6 h-6 mr-3 text-blue-600" />
+            {/* Car Details Card */}
+            <div className="bg-gray-100 dark:bg-gray-700/50 p-6 rounded-3xl shadow-xl backdrop-blur-sm">
+              <h3 className="text-2xl font-bold mb-4 flex items-center text-blue-800 dark:text-blue-300">
+                <InfoIcon className="w-6 h-6 mr-3" />
                 Car Details
               </h3>
               <div className="grid grid-cols-2 gap-4">
-                {/* Make and Model */}
-                <div className="flex items-center">
-                  <CarIcon className="w-5 h-5 mr-2 text-blue-500" />
-                  <span className="font-medium">Make: {carDetails.make}</span>
-                </div>
-                <div className="flex items-center">
-                  <TagIcon className="w-5 h-5 mr-2 text-purple-500" />
-                  <span className="font-medium">Model: {carDetails.model}</span>
-                </div>
-
-                {/* Color */}
-                <div className="flex items-center">
-                  <PaletteIcon className="w-5 h-5 mr-2 text-blue-500" />
-                  <span className="font-medium">Color: {carDetails.colour}</span>
-                </div>
-
-                {/* Seats */}
-                <div className="flex items-center">
-                  <Users className="w-5 h-5 mr-2 text-purple-500" />
-                  <span className="font-medium">Seats: {carDetails.totalSeats}</span>
-                </div>
-
-                {/* License Plate */}
-                <div className="flex items-center">
-                  <CalendarIcon className="w-5 h-5 mr-2 text-blue-500" />
-                  <span className="font-medium">License Plate: {carDetails.licensePlate}</span>
-                </div>
-
-                {/* Price */}
-                <div className="flex items-center">
-                  <DollarSign className="w-5 h-5 mr-2 text-green-500" />
-                  <span className="font-medium">Price: ₹{carDetails.pricePerDay}/day</span>
-                </div>
+                {[
+                  { icon: CarIcon, color: 'blue', label: 'Make', value: carDetails.make },
+                  { icon: TagIcon, color: 'purple', label: 'Model', value: carDetails.model },
+                  { icon: PaletteIcon, color: 'blue', label: 'Color', value: carDetails.colour },
+                  { icon: Users, color: 'purple', label: 'Seats', value: carDetails.totalSeats },
+                  { icon: CalendarIcon, color: 'blue', label: 'License Plate', value: carDetails.licensePlate },
+                  { icon: DollarSign, color: 'green', label: 'Price', value: `₹${carDetails.pricePerDay}/day` }
+                ].map(({ icon: Icon, color, label, value }) => (
+                  <div key={label} className="flex items-center space-x-3">
+                    <Icon className={`w-5 h-5 text-${color}-500`} />
+                    <div>
+                      <span className="text-gray-600 dark:text-gray-300 text-sm">{label}</span>
+                      <p className="font-medium text-gray-900 dark:text-white">{value}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Availability and Location */}
-            <div className="bg-gray-100 dark:bg-gray-700 p-6 rounded-2xl shadow-md">
-              <h3 className="text-2xl font-bold mb-4 flex items-center">
-                <LocateIcon className="w-6 h-6 mr-3 text-green-600" />
+            {/* Availability and Location Card */}
+            <div className="bg-gray-100 dark:bg-gray-700/50 p-6 rounded-3xl shadow-xl backdrop-blur-sm">
+              <h3 className="text-2xl font-bold mb-4 flex items-center text-green-800 dark:text-green-300">
+                <LocateIcon className="w-6 h-6 mr-3" />
                 Availability & Location
               </h3>
               <div className="grid grid-cols-2 gap-4">
                 {/* Available Status */}
-                <div className="flex items-center">
+                <div className="flex items-center space-x-3">
                   {carDetails.availableStatus ? (
                     <>
-                      <CheckCircle2 className="w-5 h-5 mr-2 text-green-500" />
-                      <span className="font-medium">Available from: {carDetails.availableDate}</span>
+                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                      <div>
+                        <span className="text-gray-600 dark:text-gray-300 text-sm">Status</span>
+                        <p className="font-medium text-green-700 dark:text-green-300">
+                          Available from: {carDetails.availableDate}
+                        </p>
+                      </div>
                     </>
                   ) : (
                     <>
-                      <XCircle className="w-5 h-5 mr-2 text-red-500" />
-                      <span className="font-medium">Currently Booked</span>
+                      <XCircle className="w-5 h-5 text-red-500" />
+                      <div>
+                        <span className="text-gray-600 dark:text-gray-300 text-sm">Status</span>
+                        <p className="font-medium text-red-700 dark:text-red-300">
+                          Currently Booked
+                        </p>
+                      </div>
                     </>
                   )}
                 </div>
 
-                {/* Location */}
-                <div className="flex items-center">
-                  <MapPin className="w-5 h-5 mr-2 text-green-500" />
-                  <span className="font-medium">{carDetails.city}, {carDetails.state}</span>
-                </div>
-
-                {/* Country */}
-                <div className="flex items-center">
-                  <FlagIcon className="w-5 h-5 mr-2 text-blue-500" />
-                  <span className="font-medium">Country: {carDetails.country}</span>
-                </div>
-
-                {/* Zip Code */}
-                <div className="flex items-center">
-                  <LocateIcon className="w-5 h-5 mr-2 text-purple-500" />
-                  <span className="font-medium">Zip Code: {carDetails.zipCode}</span>
-                </div>
+                {/* Location Details */}
+                {[
+                  { icon: MapPin, color: 'green', label: 'Location', value: `${carDetails.city}, ${carDetails.state}` },
+                  { icon: FlagIcon, color: 'blue', label: 'Country', value: carDetails.country },
+                  { icon: LocateIcon, color: 'purple', label: 'Zip Code', value: carDetails.zipCode }
+                ].map(({ icon: Icon, color, label, value }) => (
+                  <div key={label} className="flex items-center space-x-3">
+                    <Icon className={`w-5 h-5 text-${color}-500`} />
+                    <div>
+                      <span className="text-gray-600 dark:text-gray-300 text-sm">{label}</span>
+                      <p className="font-medium text-gray-900 dark:text-white">{value}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -148,12 +151,12 @@ const CarDetailsPage = () => {
 
         {/* Description */}
         {carDetails.description && (
-          <div className="p-8 bg-gray-100 dark:bg-gray-700">
-            <h3 className="text-2xl font-bold mb-4 flex items-center">
-              <InfoIcon className="w-6 h-6 mr-3 text-blue-600" />
+          <div className="p-8 bg-gray-100 dark:bg-gray-700/50 backdrop-blur-sm">
+            <h3 className="text-2xl font-bold mb-4 flex items-center text-blue-800 dark:text-blue-300">
+              <InfoIcon className="w-6 h-6 mr-3" />
               Car Description
             </h3>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+            <p className="text-gray-700 dark:text-gray-200 leading-relaxed bg-white/50 dark:bg-gray-800/50 p-4 rounded-2xl">
               {carDetails.description}
             </p>
           </div>
